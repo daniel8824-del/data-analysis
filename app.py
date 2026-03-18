@@ -126,13 +126,14 @@ async def api_eda(file: UploadFile = File(...), chart_mode: str = Form("plotly")
 
 
 # ---------------------------------------------------------------------------
-# API 엔드포인트 — 탭4: TCP/RFM
+# API 엔드포인트 — 탭4: 커머스 분석
 # ---------------------------------------------------------------------------
 
 @app.post("/api/tcp")
 async def api_tcp(
     file: UploadFile = File(...),
     chart_mode: str = Form("plotly"),
+    dimensions: str = Form("time,customer,product"),
     date_col: str = Form(""),
     customer_col: str = Form(""),
     product_col: str = Form(""),
@@ -146,7 +147,7 @@ async def api_tcp(
             "date": date_col, "customer": customer_col,
             "product": product_col, "quantity": quantity_col, "price": price_col,
         }
-        result = run_tcp(df, job_id, chart_mode, col_map)
+        result = run_tcp(df, job_id, chart_mode, col_map, dimensions=dimensions.split(","))
         return JSONResponse({"status": "ok", "job_id": job_id, **result})
     except Exception as e:
         logger.error(traceback.format_exc())

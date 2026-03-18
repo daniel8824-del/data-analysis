@@ -65,7 +65,7 @@
 <body>
     <div class="header">
         <h1>이커머스 데이터 자동 분석</h1>
-        <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA · TCP/RFM · 텍스트 마이닝</p>
+        <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA 분석 · 커머스 분석 · 텍스트 분석</p>
     </div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -81,9 +81,9 @@
             <select id="analysisType" onchange="onTypeChange()">
                 <option value="classify">리뷰 분류 — 카테고리별 자동 분류</option>
                 <option value="sentiment">감성 분석 — 긍정/부정/중립 판별</option>
-                <option value="eda">탐색적 데이터 분석 (EDA)</option>
-                <option value="tcp">TCP / RFM 분석 — 시간·고객·제품</option>
-                <option value="textmining">텍스트 마이닝 — TF-IDF · LDA · 네트워크</option>
+                <option value="eda">EDA 분석 — 데이터 정제 + 통계 + 시각화</option>
+                <option value="tcp">커머스 분석 — 시간·고객·상품 기준 분석</option>
+                <option value="textmining">텍스트 분석 — TF-IDF · LDA · 키워드 네트워크</option>
             </select>
 
             <label>데이터 파일</label>
@@ -103,19 +103,15 @@
                 </div>
             </div>
 
-            <!-- TCP 추가 옵션 -->
+            <!-- 커머스 분석 옵션 -->
             <div class="extra-options" id="tcpOpts">
-                <label>컬럼 매핑 <span style="font-weight:400;color:#999;">(비워두면 자동 탐지)</span></label>
-                <div class="row">
-                    <div><label>날짜</label><select id="tcp-date"><option value="">자동</option></select></div>
-                    <div><label>고객ID</label><select id="tcp-customer"><option value="">자동</option></select></div>
-                    <div><label>상품</label><select id="tcp-product"><option value="">자동</option></select></div>
+                <label>분석 기준 선택</label>
+                <div class="check-row" style="margin-bottom:12px;">
+                    <label><input type="checkbox" class="tcp-dim" value="time" checked> 시간 기준 (매출 추이, 요일별 패턴)</label>
+                    <label><input type="checkbox" class="tcp-dim" value="customer" checked> 고객 기준 (RFM, 고객 세그먼트)</label>
+                    <label><input type="checkbox" class="tcp-dim" value="product" checked> 상품 기준 (상품별 매출, 판매 랭킹)</label>
                 </div>
-                <div class="row">
-                    <div><label>수량</label><select id="tcp-quantity"><option value="">자동</option></select></div>
-                    <div><label>단가</label><select id="tcp-price"><option value="">자동</option></select></div>
-                    <div></div>
-                </div>
+                <p style="font-size:12px;color:#999;">컬럼은 자동으로 탐지됩니다. 체크한 항목만 분석합니다.</p>
             </div>
 
             <!-- 텍스트 마이닝 추가 옵션 -->
@@ -190,7 +186,7 @@
             document.getElementById('submitBtn').disabled = true;
         }
 
-        var NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA',tcp:'TCP/RFM',textmining:'텍스트 마이닝'};
+        var NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA 분석',tcp:'커머스 분석',textmining:'텍스트 분석'};
 
         async function submitAnalysis() {
             var tab = document.getElementById('analysisType').value;
@@ -203,10 +199,10 @@
             fd.append('chart_mode', chartMode);
 
             if (tab === 'tcp') {
-                ['date','customer','product','quantity','price'].forEach(function(k) {
-                    var sel = document.getElementById('tcp-' + k);
-                    if (sel) fd.append(k + '_col', sel.value || '');
-                });
+                var dims = []; document.querySelectorAll('.tcp-dim:checked').forEach(function(c){dims.push(c.value);});
+                fd.append('dimensions', dims.join(',') || 'time,customer,product');
+                fd.append('date_col', ''); fd.append('customer_col', ''); fd.append('product_col', '');
+                fd.append('quantity_col', ''); fd.append('price_col', '');
             }
             if (tab === 'textmining') {
                 fd.append('n_topics', document.getElementById('tm-topics').value || '5');

@@ -135,12 +135,16 @@ def run_tcp(
     job_id: str,
     chart_mode: str = "plotly",
     col_map: dict | None = None,
+    dimensions: list | None = None,
 ) -> dict:
     """TCP/RFM 분석 실행.
 
     Returns:
         dict with keys: summary_html, charts, details_html, downloads
     """
+    if dimensions is None:
+        dimensions = ["time", "customer", "product"]
+
     charts: list[dict] = []
     downloads: list[dict] = []
     job_dir = os.path.join(RESULT_DIR, job_id)
@@ -219,65 +223,64 @@ def run_tcp(
     # =====================================================================
     # 1. 시간 분석 (Time Analysis)
     # =====================================================================
+    if "time" in dimensions:
+        # --- 1-1. 월별 매출 추이 ---
+        df["연월"] = df[date_col].dt.to_period("M").astype(str)
+        monthly = df.groupby("연월", sort=True)["매출"].sum().reset_index()
+        monthly.columns = ["연월", "매출"]
 
-    # --- 1-1. 월별 매출 추이 ---
-    df["연월"] = df[date_col].dt.to_period("M").astype(str)
-    monthly = df.groupby("연월", sort=True)["매출"].sum().reset_index()
-    monthly.columns = ["연월", "매출"]
+        fig_monthly = plotly_line(
+            x=monthly["연월"].tolist(),
+            y=monthly["매출"].tolist(),
+            title="월별 매출 추이",
+            xlabel="월",
+            ylabel="매출(원)",
+        )
+        charts.append(_pack_chart(fig_monthly, "월별 매출 추이", chart_mode))
 
-    fig_monthly = plotly_line(
-        x=monthly["연월"].tolist(),
-        y=monthly["매출"].tolist(),
-        title="월별 매출 추이",
-        xlabel="월",
-        ylabel="매출(원)",
-    )
-    charts.append(_pack_chart(fig_monthly, "월별 매출 추이", chart_mode))
+        # CSV 저장
+        monthly_path = os.path.join(job_dir, "TCP_매출분석.csv")
+        monthly.to_csv(monthly_path, index=False, encoding="utf-8-sig")
+        downloads.append({"filename": "TCP_매출분석.csv", "label": "월별 매출 분석 CSV"})
 
-    # CSV 저장
-    monthly_path = os.path.join(job_dir, "TCP_매출분석.csv")
-    monthly.to_csv(monthly_path, index=False, encoding="utf-8-sig")
-    downloads.append({"filename": "TCP_매출분석.csv", "label": "월별 매출 분석 CSV"})
+        # --- 1-2. 일별 주문 건수 ---
+        df["날짜_only"] = df[date_col].dt.date
+        daily_orders = df.groupby("날짜_only").size().reset_index(name="주문건수")
+        daily_orders["날짜_only"] = daily_orders["날짜_only"].astype(str)
 
-    # --- 1-2. 일별 주문 건수 ---
-    df["날짜_only"] = df[date_col].dt.date
-    daily_orders = df.groupby("날짜_only").size().reset_index(name="주문건수")
-    daily_orders["날짜_only"] = daily_orders["날짜_only"].astype(str)
+        fig_daily = plotly_line(
+            x=daily_orders["날짜_only"].tolist(),
+            y=daily_orders["주문건수"].tolist(),
+            title="일별 주문 건수",
+            xlabel="날짜",
+            ylabel="주문 건수",
+        )
+        charts.append(_pack_chart(fig_daily, "일별 주문 건수", chart_mode))
 
-    fig_daily = plotly_line(
-        x=daily_orders["날짜_only"].tolist(),
-        y=daily_orders["주문건수"].tolist(),
-        title="일별 주문 건수",
-        xlabel="날짜",
-        ylabel="주문 건수",
-    )
-    charts.append(_pack_chart(fig_daily, "일별 주문 건수", chart_mode))
+        # --- 1-3. 요일별 주문 비율 ---
+        df["요일"] = df[date_col].dt.dayofweek.map(DAY_KR)
+        dow_counts = df["요일"].value_counts()
+        dow_sorted = [dow_counts.get(d, 0) for d in DAY_ORDER]
 
-    # --- 1-3. 요일별 주문 비율 ---
-    df["요일"] = df[date_col].dt.dayofweek.map(DAY_KR)
-    dow_counts = df["요일"].value_counts()
-    # DAY_ORDER 에 맞춰 정렬
-    dow_sorted = [dow_counts.get(d, 0) for d in DAY_ORDER]
-
-    fig_dow = go.Figure(go.Bar(
-        x=DAY_ORDER,
-        y=dow_sorted,
-        text=[f"{v:,}건" for v in dow_sorted],
-        textposition="outside",
-        marker_color=["#ef4444" if d in ("토", "일") else "#4361ee" for d in DAY_ORDER],
-    ))
-    fig_dow.update_layout(
-        title=dict(text="요일별 주문 비율", font=dict(size=16)),
-        xaxis_title="요일",
-        yaxis_title="주문 건수",
-        margin=dict(t=60, b=50, l=60, r=30),
-    )
-    charts.append(_pack_chart(fig_dow, "요일별 주문 비율", chart_mode))
+        fig_dow = go.Figure(go.Bar(
+            x=DAY_ORDER,
+            y=dow_sorted,
+            text=[f"{v:,}건" for v in dow_sorted],
+            textposition="outside",
+            marker_color=["#ef4444" if d in ("토", "일") else "#4361ee" for d in DAY_ORDER],
+        ))
+        fig_dow.update_layout(
+            title=dict(text="요일별 주문 비율", font=dict(size=16)),
+            xaxis_title="요일",
+            yaxis_title="주문 건수",
+            margin=dict(t=60, b=50, l=60, r=30),
+        )
+        charts.append(_pack_chart(fig_dow, "요일별 주문 비율", chart_mode))
 
     # =====================================================================
-    # 2. 상품 분석 (Product Analysis) — prod_col 이 있을 때만
+    # 2. 상품 분석 (Product Analysis)
     # =====================================================================
-    if prod_col and prod_col in df.columns:
+    if "product" in dimensions and prod_col and prod_col in df.columns:
         # --- 2-1. 상품별 매출 TOP 15 ---
         prod_revenue = (
             df.groupby(prod_col)["매출"]
@@ -313,8 +316,15 @@ def run_tcp(
         charts.append(_pack_chart(fig_prod_qty, "상품별 판매량 TOP 15", chart_mode))
 
     # =====================================================================
-    # 3. RFM 분석
+    # 3. RFM 분석 (고객 기준)
     # =====================================================================
+    if "customer" not in dimensions:
+        return {
+            "summary_html": summary_html,
+            "charts": charts,
+            "details_html": "",
+            "downloads": downloads,
+        }
     now = df[date_col].max() + pd.Timedelta(days=1)
 
     rfm = df.groupby(cust_col).agg(
