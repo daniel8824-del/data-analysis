@@ -130,15 +130,27 @@ function renderResult(tab, data, chartMode) {
             if (chart.title) {
                 div.innerHTML += `<h6 class="mb-2">${chart.title}</h6>`;
             }
-            if (chartMode === "plotly" && chart.plotly) {
+            // plotly 데이터 찾기 (chart.plotly 또는 chart.type=="plotly" + chart.data)
+            const plotlyData = chart.plotly || (chart.type === "plotly" ? JSON.parse(chart.data) : null);
+            // 이미지 데이터 찾기 (chart.image 또는 chart.type=="image" + chart.data)
+            const imageData = chart.image || (chart.type === "image" ? chart.data : null);
+
+            if (chartMode === "plotly" && plotlyData) {
                 const plotDiv = document.createElement("div");
                 plotDiv.id = `chart-${tab}-${i}`;
                 div.appendChild(plotDiv);
                 area.appendChild(div);
-                Plotly.newPlot(plotDiv.id, chart.plotly.data, chart.plotly.layout, { responsive: true });
-            } else if (chart.image) {
-                div.innerHTML += `<img src="data:image/png;base64,${chart.image}" alt="${chart.title || '차트'}">`;
+                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
+            } else if (imageData) {
+                div.innerHTML += `<img src="data:image/png;base64,${imageData}" alt="${chart.title || '차트'}">`;
                 area.appendChild(div);
+            } else if (plotlyData) {
+                // static 모드인데 plotly만 있으면 plotly로 표시
+                const plotDiv = document.createElement("div");
+                plotDiv.id = `chart-${tab}-${i}`;
+                div.appendChild(plotDiv);
+                area.appendChild(div);
+                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
             }
         });
     }

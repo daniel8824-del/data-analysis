@@ -78,7 +78,7 @@ def _build_donut_chart(counts: dict, chart_mode: str) -> dict:
     fig = plotly_donut(labels, values, title="감성 분석 비율", colors=colors)
 
     if chart_mode == "plotly":
-        return {"type": "plotly", "data": plotly_to_json(fig), "title": "감성 분석 비율"}
+        return {"title": "감성 분석 비율", "plotly": json.loads(plotly_to_json(fig))}
     else:
         # base64 fallback — matplotlib donut
         setup_matplotlib_korean()
@@ -90,7 +90,7 @@ def _build_donut_chart(counts: dict, chart_mode: str) -> dict:
         centre_circle = plt.Circle((0, 0), 0.5, fc="white")
         ax.add_artist(centre_circle)
         ax.set_title("감성 분석 비율", fontsize=14)
-        return {"type": "image", "data": fig_to_base64(mfig), "title": "감성 분석 비율"}
+        return {"title": "감성 분석 비율", "image": fig_to_base64(mfig)}
 
 
 def _build_wordcloud_chart(keyword_freq: dict, keyword_scores: dict) -> dict:
@@ -146,7 +146,7 @@ def _build_wordcloud_chart(keyword_freq: dict, keyword_scores: dict) -> dict:
     ax.axis("off")
     ax.set_title("감성 키워드 워드클라우드", fontsize=14)
 
-    return {"type": "image", "data": fig_to_base64(mfig), "title": "감성 키워드 워드클라우드"}
+    return {"title": "감성 키워드 워드클라우드", "image": fig_to_base64(mfig)}
 
 
 def _build_keyword_bar_fallback(keyword_scores: dict) -> dict:
@@ -184,7 +184,7 @@ def _build_keyword_bar_fallback(keyword_scores: dict) -> dict:
 
     mfig.suptitle("감성 키워드 빈도 (워드클라우드 대체)", fontsize=14)
     mfig.tight_layout()
-    return {"type": "image", "data": fig_to_base64(mfig), "title": "감성 키워드 워드클라우드"}
+    return {"title": "감성 키워드 워드클라우드", "image": fig_to_base64(mfig)}
 
 
 def _build_top_keywords_chart(keyword_counter_pos: Counter, keyword_counter_neg: Counter,
@@ -242,7 +242,7 @@ def _build_top_keywords_chart(keyword_counter_pos: Counter, keyword_counter_neg:
         fig.update_xaxes(title_text="건수", row=1, col=1)
         fig.update_xaxes(title_text="건수", row=1, col=2)
 
-        return {"type": "plotly", "data": plotly_to_json(fig), "title": "긍정 / 부정 키워드 TOP 5"}
+        return {"title": "긍정 / 부정 키워드 TOP 5", "plotly": json.loads(plotly_to_json(fig))}
     else:
         setup_matplotlib_korean()
         mfig, axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -263,7 +263,7 @@ def _build_top_keywords_chart(keyword_counter_pos: Counter, keyword_counter_neg:
 
         mfig.suptitle("긍정 / 부정 키워드 TOP 5", fontsize=14)
         mfig.tight_layout()
-        return {"type": "image", "data": fig_to_base64(mfig), "title": "긍정 / 부정 키워드 TOP 5"}
+        return {"title": "긍정 / 부정 키워드 TOP 5", "image": fig_to_base64(mfig)}
 
 
 # ---------------------------------------------------------------------------
