@@ -7,7 +7,7 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #28251D; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f8f9fa; color: #28251D; }
 
         .header { background: #01696F; color: white; padding: 24px 0; }
         .header h1 { max-width: 800px; margin: 0 auto; padding: 0 20px; font-size: 24px; }
@@ -19,295 +19,277 @@
         .card h2 { color: #01696F; font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #E8F5F5; }
 
         label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #333; }
-        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; background: white; }
-        input:focus, select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
+        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
+        select { background: white; }
 
         .row { display: flex; gap: 16px; }
         .row > * { flex: 1; }
+
+        .btn { background: #01696F; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
+        .btn:hover { background: #015258; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .progress-section { display: none; }
+        .progress-bar { background: #E8F5F5; border-radius: 8px; overflow: hidden; height: 8px; margin: 12px 0; }
+        .progress-fill { background: #01696F; height: 100%; transition: width 0.5s; width: 0%; }
+        .phase-text { font-size: 14px; color: #666; margin-top: 8px; }
+        .progress-pct { font-size: 24px; font-weight: 700; color: #01696F; }
 
         .file-upload-zone { border: 1px dashed #ccc; border-radius: 8px; padding: 12px; margin-bottom: 16px; background: #fafafa; }
         .file-add-btn { background: #E8F5F5; color: #01696F; border: 1px solid #01696F; border-radius: 6px; padding: 6px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .file-add-btn:hover { background: #01696F; color: white; }
         .file-list { margin-top: 8px; }
         .file-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 13px; color: #555; background: white; border-radius: 4px; margin-top: 4px; }
-        .file-item .fname { flex: 1; }
-        .file-item .fsize { color: #999; margin: 0 12px; }
-        .file-item .fremove { color: #e74c3c; cursor: pointer; font-weight: 600; border: none; background: none; font-size: 14px; }
+        .file-item .file-name { flex: 1; }
+        .file-item .file-size { color: #999; margin: 0 12px; }
+        .file-item .file-remove { color: #e74c3c; cursor: pointer; font-weight: 600; border: none; background: none; font-size: 14px; }
 
-        .btn { background: #01696F; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
-        .btn:hover { background: #015258; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* 옵션 영역 (분석별 추가 옵션) */
-        .options { display: none; margin-bottom: 16px; padding: 16px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
-        .options.show { display: block; }
-        .options label { font-size: 13px; }
-        .options .row { margin-bottom: 0; }
-        .check-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
-        .check-row label { display: flex; align-items: center; gap: 4px; font-weight: 400; font-size: 13px; cursor: pointer; margin-bottom: 0; }
-        .range-row { display: flex; gap: 24px; margin-bottom: 12px; }
-        .range-row > div { flex: 1; }
-        .range-row input[type="range"] { width: 100%; margin-bottom: 4px; }
-        .range-row small { color: #999; font-size: 12px; }
-
-        /* 진행 상태 */
-        .progress-section { display: none; }
-        .progress-bar { background: #E8F5F5; border-radius: 8px; overflow: hidden; height: 8px; margin: 12px 0; }
-        .progress-fill { background: #01696F; height: 100%; transition: width 0.5s; width: 0%; }
-        .progress-pct { font-size: 24px; font-weight: 700; color: #01696F; }
-
-        /* 결과 */
         .result-section { display: none; }
-        .result-section.show { display: block; }
-        .chart-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        .chart-card h3 { color: #01696F; font-size: 15px; margin-bottom: 12px; }
-        .chart-card img { max-width: 100%; height: auto; border-radius: 4px; }
-        .download-btn { display: inline-block; background: #01696F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 8px 8px 8px 0; font-weight: 600; font-size: 14px; }
+        .download-btn { display: inline-block; background: #01696F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 8px 8px 8px 0; font-weight: 600; }
         .download-btn:hover { background: #015258; }
 
-        details { margin-bottom: 8px; }
-        details summary { padding: 8px 0; font-weight: 600; font-size: 14px; cursor: pointer; color: #333; }
-        details summary:hover { color: #01696F; }
+        .extra-options { display: none; margin-bottom: 16px; }
+        .extra-options.show { display: block; }
+        .extra-options label { font-size: 13px; }
+        .check-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+        .check-row label { display: flex; align-items: center; gap: 4px; font-weight: 400; font-size: 13px; cursor: pointer; margin-bottom: 0; }
 
-        /* 로딩 */
-        .loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
-        .loading.show { display: flex; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #E8F5F5; border-top: 4px solid #01696F; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid #E8F5F5; border-top: 4px solid #01696F; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading p { margin-top: 16px; color: #01696F; font-weight: 600; }
-
-        /* TCP 컬럼 매핑 */
-        .col-map { display: none; }
-        .col-map.show { display: block; }
-        .col-map .row { margin-bottom: 8px; }
+        .loading-overlay p { margin-top: 16px; color: #01696F; font-weight: 600; }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <h1>이커머스 데이터 분석</h1>
-    <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA · TCP/RFM · 텍스트 마이닝</p>
-</div>
-
-<div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p id="loadingText">분석 중입니다...</p>
-</div>
-
-<div class="container">
-    <div class="card" id="mainForm">
-        <h2>데이터 분석</h2>
-
-        <label>분석 유형</label>
-        <select id="analysisType" onchange="onTypeChange()">
-            <option value="classify">리뷰 분류 — 카테고리별 자동 분류</option>
-            <option value="sentiment">감성 분석 — 긍정/부정/중립 판별</option>
-            <option value="eda">탐색적 데이터 분석 (EDA)</option>
-            <option value="tcp">TCP / RFM 분석 — 시간·고객·제품</option>
-            <option value="textmining">텍스트 마이닝 — TF-IDF · LDA · 네트워크</option>
-        </select>
-
-        <label>데이터 파일</label>
-        <div class="file-upload-zone">
-            <button type="button" class="file-add-btn" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
-            <input type="file" id="fileInput" accept=".xlsx,.csv" style="display:none" onchange="onFileChange()">
-            <div id="fileList" class="file-list"></div>
-        </div>
-
-        <div class="row" style="margin-bottom:16px;">
-            <div>
-                <label>차트 모드</label>
-                <select id="chartMode">
-                    <option value="plotly">인터랙티브 (Plotly)</option>
-                    <option value="static">정적 이미지 (PNG)</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- TCP 컬럼 매핑 -->
-        <div class="col-map" id="tcpOptions">
-            <label style="color:#01696F;">컬럼 매핑 <span style="font-weight:400;color:#999;">(비워두면 자동 탐지)</span></label>
-            <div class="row">
-                <div><label>날짜</label><select id="tcp-date"><option value="">자동</option></select></div>
-                <div><label>고객ID</label><select id="tcp-customer"><option value="">자동</option></select></div>
-                <div><label>상품</label><select id="tcp-product"><option value="">자동</option></select></div>
-            </div>
-            <div class="row">
-                <div><label>수량</label><select id="tcp-quantity"><option value="">자동</option></select></div>
-                <div><label>단가</label><select id="tcp-price"><option value="">자동</option></select></div>
-            </div>
-        </div>
-
-        <!-- 텍스트 마이닝 옵션 -->
-        <div class="options" id="tmOptions">
-            <label style="color:#01696F;">텍스트 마이닝 옵션</label>
-            <div class="range-row">
-                <div>
-                    <label>토픽 수</label>
-                    <input type="range" id="tm-topics" min="3" max="10" value="5" oninput="document.getElementById('tv').textContent=this.value">
-                    <small>토픽: <span id="tv">5</span>개</small>
-                </div>
-                <div>
-                    <label>키워드 수</label>
-                    <input type="range" id="tm-topn" min="10" max="50" value="20" oninput="document.getElementById('kv').textContent=this.value">
-                    <small>키워드: <span id="kv">20</span>개</small>
-                </div>
-            </div>
-            <label>품사 필터</label>
-            <div class="check-row">
-                <label><input type="checkbox" class="pos-f" value="NNG" checked> 명사</label>
-                <label><input type="checkbox" class="pos-f" value="NNP" checked> 고유명사</label>
-                <label><input type="checkbox" class="pos-f" value="VA"> 형용사</label>
-                <label><input type="checkbox" class="pos-f" value="VV"> 동사</label>
-            </div>
-            <label>분석 항목</label>
-            <div class="check-row">
-                <label><input type="checkbox" class="ana-f" value="tfidf" checked> TF-IDF</label>
-                <label><input type="checkbox" class="ana-f" value="lda" checked> 토픽 모델링</label>
-                <label><input type="checkbox" class="ana-f" value="network" checked> 키워드 네트워크</label>
-                <label><input type="checkbox" class="ana-f" value="wordcloud" checked> 워드클라우드</label>
-                <label><input type="checkbox" class="ana-f" value="sentiment" checked> 긍부정 분석</label>
-            </div>
-        </div>
-
-        <button class="btn" id="submitBtn" onclick="submit()" disabled>분석 시작</button>
+    <div class="header">
+        <h1>이커머스 데이터 분석</h1>
+        <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA · TCP/RFM · 텍스트 마이닝</p>
     </div>
 
-    <!-- 결과 영역 -->
-    <div class="result-section" id="resultSection">
-        <div class="card" id="resultSummary"></div>
-        <div id="resultCharts"></div>
-        <div class="card" id="resultDetails" style="display:none;"></div>
-        <div class="card" id="resultDownloads" style="display:none;"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">분석 중입니다...</p>
     </div>
-</div>
 
-<footer style="text-align:center;padding:24px;color:#999;font-size:12px;">AI 그로스팀 데이터 분석 도구 — 이커머스 클래스</footer>
+    <div class="container">
+        <form id="analysisForm" class="card">
+            <h2>데이터 분석</h2>
 
-<script>
-function onTypeChange() {
-    const t = document.getElementById('analysisType').value;
-    document.getElementById('tcpOptions').classList.toggle('show', t === 'tcp');
-    document.getElementById('tmOptions').classList.toggle('show', t === 'textmining');
-}
+            <label>분석 유형</label>
+            <select id="analysisType" onchange="onTypeChange()">
+                <option value="classify">리뷰 분류 — 카테고리별 자동 분류</option>
+                <option value="sentiment">감성 분석 — 긍정/부정/중립 판별</option>
+                <option value="eda">탐색적 데이터 분석 (EDA)</option>
+                <option value="tcp">TCP / RFM 분석 — 시간·고객·제품</option>
+                <option value="textmining">텍스트 마이닝 — TF-IDF · LDA · 네트워크</option>
+            </select>
 
-function onFileChange() {
-    const input = document.getElementById('fileInput');
-    const list = document.getElementById('fileList');
-    list.innerHTML = '';
-    if (input.files.length) {
-        const f = input.files[0];
-        const size = f.size < 1024*1024 ? (f.size/1024).toFixed(1)+'KB' : (f.size/1024/1024).toFixed(1)+'MB';
-        list.innerHTML = `<div class="file-item"><span class="fname">${f.name}</span><span class="fsize">${size}</span><button class="fremove" onclick="removeFile()">✕</button></div>`;
-        document.getElementById('submitBtn').disabled = false;
-    }
-}
+            <label>데이터 파일</label>
+            <div class="file-upload-zone">
+                <button type="button" class="file-add-btn" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
+                <input type="file" id="fileInput" accept=".xlsx,.csv" style="display:none" onchange="onFileChange()">
+                <div id="fileList" class="file-list"></div>
+            </div>
 
-function removeFile() {
-    document.getElementById('fileInput').value = '';
-    document.getElementById('fileList').innerHTML = '';
-    document.getElementById('submitBtn').disabled = true;
-}
+            <div class="row">
+                <div>
+                    <label>차트 모드</label>
+                    <select id="chartMode">
+                        <option value="plotly">인터랙티브 (Plotly)</option>
+                        <option value="static">정적 이미지 (PNG)</option>
+                    </select>
+                </div>
+            </div>
 
-const NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA',tcp:'TCP/RFM',textmining:'텍스트 마이닝'};
+            <!-- TCP 추가 옵션 -->
+            <div class="extra-options" id="tcpOpts">
+                <label>컬럼 매핑 <span style="font-weight:400;color:#999;">(비워두면 자동 탐지)</span></label>
+                <div class="row">
+                    <div><label>날짜</label><select id="tcp-date"><option value="">자동</option></select></div>
+                    <div><label>고객ID</label><select id="tcp-customer"><option value="">자동</option></select></div>
+                    <div><label>상품</label><select id="tcp-product"><option value="">자동</option></select></div>
+                </div>
+                <div class="row">
+                    <div><label>수량</label><select id="tcp-quantity"><option value="">자동</option></select></div>
+                    <div><label>단가</label><select id="tcp-price"><option value="">자동</option></select></div>
+                    <div></div>
+                </div>
+            </div>
 
-async function submit() {
-    const tab = document.getElementById('analysisType').value;
-    const input = document.getElementById('fileInput');
-    const chartMode = document.getElementById('chartMode').value;
-    if (!input.files.length) return;
+            <!-- 텍스트 마이닝 추가 옵션 -->
+            <div class="extra-options" id="tmOpts">
+                <label>텍스트 마이닝 옵션</label>
+                <div class="row" style="margin-bottom:8px;">
+                    <div>
+                        <label>토픽 수</label>
+                        <input type="range" id="tm-topics" min="3" max="10" value="5" style="margin-bottom:4px;" oninput="document.getElementById('tv').textContent=this.value">
+                        <span style="font-size:12px;color:#999;">토픽: <span id="tv">5</span>개</span>
+                    </div>
+                    <div>
+                        <label>키워드 수</label>
+                        <input type="range" id="tm-topn" min="10" max="50" value="20" style="margin-bottom:4px;" oninput="document.getElementById('kv').textContent=this.value">
+                        <span style="font-size:12px;color:#999;">키워드: <span id="kv">20</span>개</span>
+                    </div>
+                </div>
+                <label>품사 필터</label>
+                <div class="check-row">
+                    <label><input type="checkbox" class="pos-f" value="NNG" checked> 명사</label>
+                    <label><input type="checkbox" class="pos-f" value="NNP" checked> 고유명사</label>
+                    <label><input type="checkbox" class="pos-f" value="VA"> 형용사</label>
+                    <label><input type="checkbox" class="pos-f" value="VV"> 동사</label>
+                </div>
+                <label>분석 항목</label>
+                <div class="check-row">
+                    <label><input type="checkbox" class="ana-f" value="tfidf" checked> TF-IDF</label>
+                    <label><input type="checkbox" class="ana-f" value="lda" checked> 토픽 모델링</label>
+                    <label><input type="checkbox" class="ana-f" value="network" checked> 키워드 네트워크</label>
+                    <label><input type="checkbox" class="ana-f" value="wordcloud" checked> 워드클라우드</label>
+                    <label><input type="checkbox" class="ana-f" value="sentiment" checked> 긍부정 분석</label>
+                </div>
+            </div>
 
-    const fd = new FormData();
-    fd.append('file', input.files[0]);
-    fd.append('chart_mode', chartMode);
+            <button type="button" class="btn" id="submitBtn" onclick="submitAnalysis()" disabled>분석 시작</button>
+        </form>
 
-    if (tab === 'tcp') {
-        ['date','customer','product','quantity','price'].forEach(k => {
-            fd.append(k+'_col', document.getElementById('tcp-'+k)?.value || '');
-        });
-    }
-    if (tab === 'textmining') {
-        fd.append('n_topics', document.getElementById('tm-topics')?.value || '5');
-        fd.append('top_n', document.getElementById('tm-topn')?.value || '20');
-        fd.append('pos_filter', [...document.querySelectorAll('.pos-f:checked')].map(c=>c.value).join(',') || 'NNG,NNP');
-        fd.append('analyses', [...document.querySelectorAll('.ana-f:checked')].map(c=>c.value).join(',') || 'tfidf');
-    }
+        <!-- 진행 상태 -->
+        <div id="progressSection" class="card progress-section">
+            <h2>분석 진행 중...</h2>
+            <div class="progress-pct" id="progressPct">0%</div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="phase-text" id="phaseText">준비 중...</div>
+        </div>
 
-    // 로딩
-    const el = document.getElementById('loading');
-    document.getElementById('loadingText').textContent = (NAMES[tab]||tab) + ' 분석 중...';
-    el.classList.add('show');
-    document.getElementById('submitBtn').disabled = true;
+        <!-- 결과 -->
+        <div id="resultSection" class="result-section"></div>
+    </div>
 
-    try {
-        const resp = await fetch('/api/' + tab, {method:'POST', body:fd});
-        const data = await resp.json();
-        if (data.status === 'ok') renderResult(data, chartMode);
-        else alert('분석 오류: ' + (data.message || '알 수 없는 오류'));
-    } catch(e) {
-        alert('네트워크 오류: ' + e.message);
-    } finally {
-        el.classList.remove('show');
-        document.getElementById('submitBtn').disabled = false;
-    }
-}
+    <script>
+        function onTypeChange() {
+            var t = document.getElementById('analysisType').value;
+            document.getElementById('tcpOpts').className = 'extra-options' + (t === 'tcp' ? ' show' : '');
+            document.getElementById('tmOpts').className = 'extra-options' + (t === 'textmining' ? ' show' : '');
+        }
 
-function renderResult(data, chartMode) {
-    const section = document.getElementById('resultSection');
-    section.classList.add('show');
-    section.style.display = 'block';
-
-    // 요약
-    const summary = document.getElementById('resultSummary');
-    summary.innerHTML = data.summary_html ? `<h2>분석 결과</h2>${data.summary_html}` : '';
-
-    // 차트
-    const charts = document.getElementById('resultCharts');
-    charts.innerHTML = '';
-    if (data.charts) {
-        data.charts.forEach((chart, i) => {
-            const box = document.createElement('div');
-            box.className = 'chart-card';
-            if (chart.title) box.innerHTML += `<h3>${chart.title}</h3>`;
-
-            const pData = chart.plotly || (chart.type==='plotly' ? JSON.parse(chart.data) : null);
-            const iData = chart.image || (chart.type==='image' ? chart.data : null);
-
-            if (chartMode==='plotly' && pData) {
-                const d = document.createElement('div'); d.id = 'ch-'+i;
-                box.appendChild(d); charts.appendChild(box);
-                Plotly.newPlot(d.id, pData.data, pData.layout, {responsive:true});
-            } else if (iData) {
-                box.innerHTML += `<img src="data:image/png;base64,${iData}">`;
-                charts.appendChild(box);
-            } else if (pData) {
-                const d = document.createElement('div'); d.id = 'ch-'+i;
-                box.appendChild(d); charts.appendChild(box);
-                Plotly.newPlot(d.id, pData.data, pData.layout, {responsive:true});
+        function onFileChange() {
+            var input = document.getElementById('fileInput');
+            var list = document.getElementById('fileList');
+            list.innerHTML = '';
+            if (input.files.length) {
+                var f = input.files[0];
+                var size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+'MB' : (f.size/1024).toFixed(0)+'KB';
+                list.innerHTML = '<div class="file-item"><span class="file-name">' + f.name + '</span><span class="file-size">' + size + '</span><button type="button" class="file-remove" onclick="removeFile()">X</button></div>';
+                document.getElementById('submitBtn').disabled = false;
             }
-        });
-    }
+        }
 
-    // 상세
-    const details = document.getElementById('resultDetails');
-    if (data.details_html) {
-        details.innerHTML = `<h2>상세 결과</h2>${data.details_html}`;
-        details.style.display = 'block';
-    } else { details.style.display = 'none'; }
+        function removeFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('submitBtn').disabled = true;
+        }
 
-    // 다운로드
-    const dl = document.getElementById('resultDownloads');
-    if (data.job_id && data.downloads && data.downloads.length) {
-        let html = '<h2>다운로드</h2>';
-        data.downloads.forEach(f => {
-            html += `<a href="/api/download/${data.job_id}/${f.filename}" class="download-btn">⬇ ${f.label}</a>`;
-        });
-        dl.innerHTML = html;
-        dl.style.display = 'block';
-    } else { dl.style.display = 'none'; }
+        var NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA',tcp:'TCP/RFM',textmining:'텍스트 마이닝'};
 
-    section.scrollIntoView({behavior:'smooth', block:'start'});
-}
-</script>
+        async function submitAnalysis() {
+            var tab = document.getElementById('analysisType').value;
+            var input = document.getElementById('fileInput');
+            var chartMode = document.getElementById('chartMode').value;
+            if (!input.files.length) return;
+
+            var fd = new FormData();
+            fd.append('file', input.files[0]);
+            fd.append('chart_mode', chartMode);
+
+            if (tab === 'tcp') {
+                ['date','customer','product','quantity','price'].forEach(function(k) {
+                    var sel = document.getElementById('tcp-' + k);
+                    if (sel) fd.append(k + '_col', sel.value || '');
+                });
+            }
+            if (tab === 'textmining') {
+                fd.append('n_topics', document.getElementById('tm-topics').value || '5');
+                fd.append('top_n', document.getElementById('tm-topn').value || '20');
+                var posArr = []; document.querySelectorAll('.pos-f:checked').forEach(function(c){posArr.push(c.value);});
+                fd.append('pos_filter', posArr.join(',') || 'NNG,NNP');
+                var anaArr = []; document.querySelectorAll('.ana-f:checked').forEach(function(c){anaArr.push(c.value);});
+                fd.append('analyses', anaArr.join(',') || 'tfidf');
+            }
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loadingText').textContent = (NAMES[tab] || tab) + ' 분석 중...';
+            document.getElementById('loadingOverlay').classList.add('show');
+
+            try {
+                var resp = await fetch('/api/' + tab, {method: 'POST', body: fd});
+                var data = await resp.json();
+                if (data.status === 'ok') {
+                    showResult(data, chartMode);
+                } else {
+                    alert('분석 오류: ' + (data.message || '알 수 없는 오류'));
+                }
+            } catch(e) {
+                alert('네트워크 오류: ' + e.message);
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+
+        function showResult(data, chartMode) {
+            var section = document.getElementById('resultSection');
+            section.innerHTML = '';
+            section.style.display = 'block';
+
+            // 요약
+            if (data.summary_html) {
+                section.innerHTML += '<div class="card"><h2>분석 결과</h2>' + data.summary_html + '</div>';
+            }
+
+            // 차트
+            if (data.charts) {
+                data.charts.forEach(function(chart, i) {
+                    var html = '<div class="card">';
+                    if (chart.title) html += '<h2>' + chart.title + '</h2>';
+
+                    var pData = chart.plotly || (chart.type === 'plotly' ? JSON.parse(chart.data) : null);
+                    var iData = chart.image || (chart.type === 'image' ? chart.data : null);
+
+                    if (chartMode === 'plotly' && pData) {
+                        html += '<div id="plotly-' + i + '"></div>';
+                        html += '</div>';
+                        section.innerHTML += html;
+                        Plotly.newPlot('plotly-' + i, pData.data, pData.layout, {responsive: true});
+                    } else if (iData) {
+                        html += '<img src="data:image/png;base64,' + iData + '" style="max-width:100%;border-radius:4px;">';
+                        html += '</div>';
+                        section.innerHTML += html;
+                    } else if (pData) {
+                        html += '<div id="plotly-' + i + '"></div>';
+                        html += '</div>';
+                        section.innerHTML += html;
+                        Plotly.newPlot('plotly-' + i, pData.data, pData.layout, {responsive: true});
+                    }
+                });
+            }
+
+            // 상세
+            if (data.details_html) {
+                section.innerHTML += '<div class="card"><h2>상세 결과</h2>' + data.details_html + '</div>';
+            }
+
+            // 다운로드
+            if (data.job_id && data.downloads && data.downloads.length) {
+                var dlHtml = '<div class="card"><h2>다운로드</h2>';
+                data.downloads.forEach(function(f) {
+                    dlHtml += '<a class="download-btn" href="/api/download/' + data.job_id + '/' + f.filename + '" download>' + f.label + '</a>';
+                });
+                section.innerHTML += dlHtml + '</div>';
+            }
+
+            section.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+    </script>
 </body>
 </html>
