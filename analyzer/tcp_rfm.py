@@ -60,8 +60,10 @@ def detect_commerce_columns(df: pd.DataFrame) -> dict:
     mapping: dict[str, str] = {}
     for col in df.columns:
         cl = col.lower()
-        if any(k in cl for k in ["date", "날짜", "일자", "invoice"]):
+        if any(k in cl for k in ["date", "날짜", "일자", "invoicedate", "orderdate", "order_date"]):
             mapping.setdefault("date", col)
+        elif cl in ("invoice", "invoiceno", "invoice_no") and "date" not in mapping:
+            pass  # InvoiceNo는 날짜가 아님 — 건너뜀
         elif any(k in cl for k in ["customer", "고객", "회원", "user"]):
             mapping.setdefault("customer", col)
         elif any(k in cl for k in ["product", "상품", "제품", "item", "description", "stock"]):
