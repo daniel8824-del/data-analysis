@@ -1,0 +1,161 @@
+:root {
+    --primary: #4361ee;
+    --primary-light: #4895ef;
+    --secondary: #3f37c9;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --dark: #2b2d42;
+    --light: #f8f9fa;
+    --gray: #e9ecef;
+    --border-radius: 0.5rem;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f0f2f5;
+    color: var(--dark);
+    line-height: 1.6;
+}
+
+.header-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1.5rem 0;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+.header-gradient h1 { font-weight: 700; margin: 0; font-size: 1.6rem; }
+.header-gradient p { opacity: 0.9; margin: 0.3rem 0 0; font-size: 0.9rem; }
+
+/* 탭 네비게이션 */
+.nav-tabs .nav-link {
+    color: var(--dark);
+    font-weight: 500;
+    border: none;
+    padding: 0.75rem 1.2rem;
+    transition: all 0.2s;
+}
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+    font-weight: 700;
+    background: transparent;
+}
+.nav-tabs .nav-link:hover:not(.active) {
+    color: var(--primary-light);
+    border-bottom: 3px solid var(--gray);
+}
+.nav-tabs .nav-link i { margin-right: 0.4rem; }
+
+/* 카드 */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+}
+.card-header {
+    background: white;
+    border-bottom: 1px solid var(--gray);
+    font-weight: 600;
+    padding: 0.8rem 1.2rem;
+}
+
+/* 업로드 영역 */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafbfc;
+}
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--primary);
+    background: #eef2ff;
+}
+.upload-zone i { font-size: 2rem; color: #94a3b8; margin-bottom: 0.5rem; }
+.upload-zone p { color: #64748b; margin: 0; }
+.upload-zone .file-name { color: var(--primary); font-weight: 600; margin-top: 0.5rem; }
+
+/* 옵션 패널 */
+.option-panel {
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+}
+.option-panel label { font-weight: 500; font-size: 0.85rem; }
+
+/* 분석 버튼 */
+.btn-analyze {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0.6rem 2rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    transition: all 0.3s;
+}
+.btn-analyze:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(67,97,238,0.4); color: white; }
+.btn-analyze:disabled { opacity: 0.6; transform: none; }
+
+/* 결과 영역 */
+.result-area { display: none; }
+.result-area.show { display: block; }
+
+/* 차트 컨테이너 */
+.chart-container {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.chart-container img { max-width: 100%; height: auto; }
+
+/* 테이블 */
+.table-result { font-size: 0.88rem; }
+.table-result th { background: var(--light); font-weight: 600; }
+
+/* 로딩 */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.85);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.loading-overlay.show { display: flex; }
+.loading-overlay .spinner-border { width: 3rem; height: 3rem; color: var(--primary); }
+.loading-overlay p { margin-top: 1rem; font-weight: 500; color: var(--dark); }
+
+/* 다운로드 버튼 */
+.btn-download {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.btn-download:hover { background: #059669; color: white; }
+
+/* 아코디언 */
+.review-accordion .accordion-button { font-size: 0.88rem; padding: 0.6rem 1rem; }
+.review-accordion .accordion-body { font-size: 0.85rem; max-height: 300px; overflow-y: auto; }
+.review-item { padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+.review-item:last-child { border-bottom: none; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link { padding: 0.5rem 0.6rem; font-size: 0.8rem; }
+    .nav-tabs .nav-link i { display: none; }
+}
