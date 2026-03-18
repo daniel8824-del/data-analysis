@@ -10,99 +10,76 @@
         body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #28251D; }
 
         .header { background: #01696F; color: white; padding: 24px 0; }
-        .header h1 { max-width: 900px; margin: 0 auto; padding: 0 20px; font-size: 24px; }
-        .header p { max-width: 900px; margin: 4px auto 0; padding: 0 20px; opacity: 0.8; font-size: 14px; }
+        .header h1 { max-width: 800px; margin: 0 auto; padding: 0 20px; font-size: 24px; }
+        .header p { max-width: 800px; margin: 4px auto 0; padding: 0 20px; opacity: 0.8; font-size: 14px; }
 
-        .container { max-width: 900px; margin: 32px auto; padding: 0 20px; }
+        .container { max-width: 800px; margin: 32px auto; padding: 0 20px; }
 
-        /* 탭 네비게이션 */
-        .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #E8F5F5; margin-bottom: 24px; overflow-x: auto; }
-        .tab-btn { background: none; border: none; padding: 12px 20px; font-size: 14px; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.2s; }
-        .tab-btn:hover { color: #01696F; }
-        .tab-btn.active { color: #01696F; border-bottom-color: #01696F; }
-
-        /* 카드 */
         .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
         .card h2 { color: #01696F; font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #E8F5F5; }
-        .card h3 { color: #333; font-size: 15px; margin: 16px 0 8px; }
 
-        /* 폼 요소 */
         label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #333; }
-        select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; background: white; }
-        select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
+        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; background: white; }
+        input:focus, select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
 
-        /* 파일 업로드 */
-        .file-upload-zone { border: 1px dashed #ccc; border-radius: 8px; padding: 24px; margin-bottom: 16px; background: #fafafa; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .file-upload-zone:hover, .file-upload-zone.dragover { border-color: #01696F; background: #E8F5F5; }
-        .file-upload-zone .icon { font-size: 32px; margin-bottom: 8px; }
-        .file-upload-zone p { color: #999; font-size: 13px; }
-        .file-upload-zone .file-name { color: #01696F; font-weight: 600; margin-top: 8px; font-size: 14px; }
+        .row { display: flex; gap: 16px; }
+        .row > * { flex: 1; }
 
-        /* 옵션 */
-        .option-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-        .option-row label { margin-bottom: 0; font-size: 13px; }
-        .radio-group { display: flex; gap: 16px; }
-        .radio-group label { display: flex; align-items: center; gap: 4px; font-weight: 400; cursor: pointer; }
-        .radio-group input { margin: 0; }
+        .file-upload-zone { border: 1px dashed #ccc; border-radius: 8px; padding: 12px; margin-bottom: 16px; background: #fafafa; }
+        .file-add-btn { background: #E8F5F5; color: #01696F; border: 1px solid #01696F; border-radius: 6px; padding: 6px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .file-add-btn:hover { background: #01696F; color: white; }
+        .file-list { margin-top: 8px; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 13px; color: #555; background: white; border-radius: 4px; margin-top: 4px; }
+        .file-item .fname { flex: 1; }
+        .file-item .fsize { color: #999; margin: 0 12px; }
+        .file-item .fremove { color: #e74c3c; cursor: pointer; font-weight: 600; border: none; background: none; font-size: 14px; }
 
-        .checkbox-group { display: flex; gap: 12px; flex-wrap: wrap; }
-        .checkbox-group label { display: flex; align-items: center; gap: 4px; font-weight: 400; font-size: 13px; cursor: pointer; }
-
-        .range-row { display: flex; gap: 24px; margin-bottom: 12px; }
-        .range-row > div { flex: 1; }
-        .range-row input[type="range"] { width: 100%; }
-        .range-row small { color: #999; font-size: 12px; }
-
-        /* 버튼 */
         .btn { background: #01696F; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
         .btn:hover { background: #015258; }
         .btn:disabled { background: #ccc; cursor: not-allowed; }
 
-        .btn-download { display: inline-block; background: #01696F; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin: 4px 8px 4px 0; font-weight: 600; font-size: 13px; }
-        .btn-download:hover { background: #015258; }
+        /* 옵션 영역 (분석별 추가 옵션) */
+        .options { display: none; margin-bottom: 16px; padding: 16px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
+        .options.show { display: block; }
+        .options label { font-size: 13px; }
+        .options .row { margin-bottom: 0; }
+        .check-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+        .check-row label { display: flex; align-items: center; gap: 4px; font-weight: 400; font-size: 13px; cursor: pointer; margin-bottom: 0; }
+        .range-row { display: flex; gap: 24px; margin-bottom: 12px; }
+        .range-row > div { flex: 1; }
+        .range-row input[type="range"] { width: 100%; margin-bottom: 4px; }
+        .range-row small { color: #999; font-size: 12px; }
 
-        /* 결과 영역 */
-        .result-area { display: none; }
-        .result-area.show { display: block; }
+        /* 진행 상태 */
+        .progress-section { display: none; }
+        .progress-bar { background: #E8F5F5; border-radius: 8px; overflow: hidden; height: 8px; margin: 12px 0; }
+        .progress-fill { background: #01696F; height: 100%; transition: width 0.5s; width: 0%; }
+        .progress-pct { font-size: 24px; font-weight: 700; color: #01696F; }
 
-        .chart-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        .chart-box h3 { color: #01696F; font-size: 15px; margin-bottom: 12px; }
-        .chart-box img { max-width: 100%; height: auto; border-radius: 4px; }
+        /* 결과 */
+        .result-section { display: none; }
+        .result-section.show { display: block; }
+        .chart-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
+        .chart-card h3 { color: #01696F; font-size: 15px; margin-bottom: 12px; }
+        .chart-card img { max-width: 100%; height: auto; border-radius: 4px; }
+        .download-btn { display: inline-block; background: #01696F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 8px 8px 8px 0; font-weight: 600; font-size: 14px; }
+        .download-btn:hover { background: #015258; }
 
-        .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
-        .summary-table th { background: #E8F5F5; color: #01696F; font-weight: 600; padding: 10px 12px; text-align: left; }
-        .summary-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
-        .summary-table tr:hover td { background: #fafafa; }
-
-        /* 아코디언 */
-        details { border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; }
-        details summary { padding: 10px 14px; font-weight: 600; font-size: 14px; cursor: pointer; color: #333; }
+        details { margin-bottom: 8px; }
+        details summary { padding: 8px 0; font-weight: 600; font-size: 14px; cursor: pointer; color: #333; }
         details summary:hover { color: #01696F; }
-        details[open] summary { border-bottom: 1px solid #eee; }
-        details .detail-body { padding: 12px 14px; font-size: 13px; color: #555; max-height: 300px; overflow-y: auto; }
 
         /* 로딩 */
         .loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
         .loading.show { display: flex; }
         .spinner { width: 40px; height: 40px; border: 4px solid #E8F5F5; border-top: 4px solid #01696F; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading p { margin-top: 16px; color: #01696F; font-weight: 600; font-size: 14px; }
-
-        /* 탭 콘텐츠 */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .loading p { margin-top: 16px; color: #01696F; font-weight: 600; }
 
         /* TCP 컬럼 매핑 */
-        .col-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
-        .col-map label { font-size: 12px; margin-bottom: 4px; }
-        .col-map select { margin-bottom: 0; font-size: 13px; padding: 8px; }
-
-        /* 반응형 */
-        @media (max-width: 600px) {
-            .tab-btn { padding: 10px 12px; font-size: 12px; }
-            .card { padding: 20px; }
-            .option-row { flex-direction: column; gap: 8px; }
-        }
+        .col-map { display: none; }
+        .col-map.show { display: block; }
+        .col-map .row { margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -118,210 +95,126 @@
 </div>
 
 <div class="container">
-    <!-- 탭 네비게이션 -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('classify')">리뷰 분류</button>
-        <button class="tab-btn" onclick="switchTab('sentiment')">감성 분석</button>
-        <button class="tab-btn" onclick="switchTab('eda')">EDA</button>
-        <button class="tab-btn" onclick="switchTab('tcp')">TCP / RFM</button>
-        <button class="tab-btn" onclick="switchTab('textmining')">텍스트 마이닝</button>
-    </div>
+    <div class="card" id="mainForm">
+        <h2>데이터 분석</h2>
 
-    <!-- ===== 탭1: 리뷰 분류 ===== -->
-    <div class="tab-content active" id="panel-classify">
-        <div class="card">
-            <h2>리뷰 분류 (Classify)</h2>
-            <p style="color:#999;font-size:13px;margin-bottom:16px;">리뷰 데이터를 카테고리별로 자동 분류합니다. (고객서비스 > 배송 > 가격 > 품질 > 디자인 > 기능 > 만족도)</p>
-            <div class="file-upload-zone" data-tab="classify">
-                <div class="icon">📄</div>
-                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
-                <div class="file-name"></div>
-            </div>
-            <div class="option-row">
-                <label>차트 모드 :</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="classify_chart" value="plotly" checked> 인터랙티브</label>
-                    <label><input type="radio" name="classify_chart" value="static"> 정적 이미지</label>
-                </div>
-            </div>
-            <button class="btn" onclick="runAnalysis('classify')" disabled data-tab="classify">분석 시작</button>
+        <label>분석 유형</label>
+        <select id="analysisType" onchange="onTypeChange()">
+            <option value="classify">리뷰 분류 — 카테고리별 자동 분류</option>
+            <option value="sentiment">감성 분석 — 긍정/부정/중립 판별</option>
+            <option value="eda">탐색적 데이터 분석 (EDA)</option>
+            <option value="tcp">TCP / RFM 분석 — 시간·고객·제품</option>
+            <option value="textmining">텍스트 마이닝 — TF-IDF · LDA · 네트워크</option>
+        </select>
+
+        <label>데이터 파일</label>
+        <div class="file-upload-zone">
+            <button type="button" class="file-add-btn" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
+            <input type="file" id="fileInput" accept=".xlsx,.csv" style="display:none" onchange="onFileChange()">
+            <div id="fileList" class="file-list"></div>
         </div>
-        <div class="result-area" id="result-classify"></div>
-    </div>
 
-    <!-- ===== 탭2: 감성 분석 ===== -->
-    <div class="tab-content" id="panel-sentiment">
-        <div class="card">
-            <h2>감성 분석 (Sentiment)</h2>
-            <p style="color:#999;font-size:13px;margin-bottom:16px;">텍스트 기반 감성 사전 점수제로 긍정/부정/중립을 분류합니다.</p>
-            <div class="file-upload-zone" data-tab="sentiment">
-                <div class="icon">📄</div>
-                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
-                <div class="file-name"></div>
+        <div class="row" style="margin-bottom:16px;">
+            <div>
+                <label>차트 모드</label>
+                <select id="chartMode">
+                    <option value="plotly">인터랙티브 (Plotly)</option>
+                    <option value="static">정적 이미지 (PNG)</option>
+                </select>
             </div>
-            <div class="option-row">
-                <label>차트 모드 :</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="sentiment_chart" value="plotly" checked> 인터랙티브</label>
-                    <label><input type="radio" name="sentiment_chart" value="static"> 정적 이미지</label>
-                </div>
-            </div>
-            <button class="btn" onclick="runAnalysis('sentiment')" disabled data-tab="sentiment">분석 시작</button>
         </div>
-        <div class="result-area" id="result-sentiment"></div>
-    </div>
 
-    <!-- ===== 탭3: EDA ===== -->
-    <div class="tab-content" id="panel-eda">
-        <div class="card">
-            <h2>탐색적 데이터 분석 (EDA)</h2>
-            <p style="color:#999;font-size:13px;margin-bottom:16px;">업로드된 데이터의 구조, 기초 통계량, 분포, 상관관계를 자동 분석합니다.</p>
-            <div class="file-upload-zone" data-tab="eda">
-                <div class="icon">📄</div>
-                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
-                <div class="file-name"></div>
+        <!-- TCP 컬럼 매핑 -->
+        <div class="col-map" id="tcpOptions">
+            <label style="color:#01696F;">컬럼 매핑 <span style="font-weight:400;color:#999;">(비워두면 자동 탐지)</span></label>
+            <div class="row">
+                <div><label>날짜</label><select id="tcp-date"><option value="">자동</option></select></div>
+                <div><label>고객ID</label><select id="tcp-customer"><option value="">자동</option></select></div>
+                <div><label>상품</label><select id="tcp-product"><option value="">자동</option></select></div>
             </div>
-            <div class="option-row">
-                <label>차트 모드 :</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="eda_chart" value="plotly" checked> 인터랙티브</label>
-                    <label><input type="radio" name="eda_chart" value="static"> 정적 이미지</label>
-                </div>
+            <div class="row">
+                <div><label>수량</label><select id="tcp-quantity"><option value="">자동</option></select></div>
+                <div><label>단가</label><select id="tcp-price"><option value="">자동</option></select></div>
             </div>
-            <button class="btn" onclick="runAnalysis('eda')" disabled data-tab="eda">분석 시작</button>
         </div>
-        <div class="result-area" id="result-eda"></div>
-    </div>
 
-    <!-- ===== 탭4: TCP/RFM ===== -->
-    <div class="tab-content" id="panel-tcp">
-        <div class="card">
-            <h2>TCP / RFM 분석</h2>
-            <p style="color:#999;font-size:13px;margin-bottom:16px;">시간(Time) · 고객(Customer) · 제품(Product) 분석 + RFM 고객 세그먼트</p>
-            <div class="file-upload-zone" data-tab="tcp">
-                <div class="icon">📄</div>
-                <p>커머스 데이터 (주문일, 고객ID, 상품명, 수량, 단가 포함) 업로드</p>
-                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
-                <div class="file-name"></div>
-            </div>
-            <div class="col-map" id="tcp-colmap" style="display:none;">
-                <div><label>날짜 컬럼</label><select id="tcp-date"></select></div>
-                <div><label>고객ID 컬럼</label><select id="tcp-customer"></select></div>
-                <div><label>상품 컬럼</label><select id="tcp-product"></select></div>
-                <div><label>수량 컬럼</label><select id="tcp-quantity"></select></div>
-                <div><label>단가 컬럼</label><select id="tcp-price"></select></div>
-            </div>
-            <div class="option-row">
-                <label>차트 모드 :</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="tcp_chart" value="plotly" checked> 인터랙티브</label>
-                    <label><input type="radio" name="tcp_chart" value="static"> 정적 이미지</label>
-                </div>
-            </div>
-            <button class="btn" onclick="runAnalysis('tcp')" disabled data-tab="tcp">분석 시작</button>
-        </div>
-        <div class="result-area" id="result-tcp"></div>
-    </div>
-
-    <!-- ===== 탭5: 텍스트 마이닝 ===== -->
-    <div class="tab-content" id="panel-textmining">
-        <div class="card">
-            <h2>텍스트 마이닝</h2>
-            <p style="color:#999;font-size:13px;margin-bottom:16px;">형태소 분석 · TF-IDF · 토픽 모델링(LDA) · 키워드 네트워크 · 긍부정 분석</p>
-            <div class="file-upload-zone" data-tab="textmining">
-                <div class="icon">📄</div>
-                <p>텍스트 데이터 (엑셀/CSV) 업로드</p>
-                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
-                <div class="file-name"></div>
-            </div>
+        <!-- 텍스트 마이닝 옵션 -->
+        <div class="options" id="tmOptions">
+            <label style="color:#01696F;">텍스트 마이닝 옵션</label>
             <div class="range-row">
                 <div>
                     <label>토픽 수</label>
-                    <input type="range" id="tm-topics" min="3" max="10" value="5" oninput="document.getElementById('tm-topics-v').textContent=this.value">
-                    <small>토픽: <span id="tm-topics-v">5</span>개</small>
+                    <input type="range" id="tm-topics" min="3" max="10" value="5" oninput="document.getElementById('tv').textContent=this.value">
+                    <small>토픽: <span id="tv">5</span>개</small>
                 </div>
                 <div>
                     <label>키워드 수</label>
-                    <input type="range" id="tm-topn" min="10" max="50" value="20" oninput="document.getElementById('tm-topn-v').textContent=this.value">
-                    <small>키워드: <span id="tm-topn-v">20</span>개</small>
+                    <input type="range" id="tm-topn" min="10" max="50" value="20" oninput="document.getElementById('kv').textContent=this.value">
+                    <small>키워드: <span id="kv">20</span>개</small>
                 </div>
             </div>
-            <div style="margin-bottom:12px;">
-                <label>품사 필터</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" class="pos-filter" value="NNG" checked> 명사</label>
-                    <label><input type="checkbox" class="pos-filter" value="NNP" checked> 고유명사</label>
-                    <label><input type="checkbox" class="pos-filter" value="VA"> 형용사</label>
-                    <label><input type="checkbox" class="pos-filter" value="VV"> 동사</label>
-                </div>
+            <label>품사 필터</label>
+            <div class="check-row">
+                <label><input type="checkbox" class="pos-f" value="NNG" checked> 명사</label>
+                <label><input type="checkbox" class="pos-f" value="NNP" checked> 고유명사</label>
+                <label><input type="checkbox" class="pos-f" value="VA"> 형용사</label>
+                <label><input type="checkbox" class="pos-f" value="VV"> 동사</label>
             </div>
-            <div style="margin-bottom:16px;">
-                <label>분석 항목</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" class="analysis-chk" value="tfidf" checked> TF-IDF</label>
-                    <label><input type="checkbox" class="analysis-chk" value="lda" checked> 토픽 모델링</label>
-                    <label><input type="checkbox" class="analysis-chk" value="network" checked> 키워드 네트워크</label>
-                    <label><input type="checkbox" class="analysis-chk" value="wordcloud" checked> 워드클라우드</label>
-                    <label><input type="checkbox" class="analysis-chk" value="sentiment" checked> 긍부정 분석</label>
-                </div>
+            <label>분석 항목</label>
+            <div class="check-row">
+                <label><input type="checkbox" class="ana-f" value="tfidf" checked> TF-IDF</label>
+                <label><input type="checkbox" class="ana-f" value="lda" checked> 토픽 모델링</label>
+                <label><input type="checkbox" class="ana-f" value="network" checked> 키워드 네트워크</label>
+                <label><input type="checkbox" class="ana-f" value="wordcloud" checked> 워드클라우드</label>
+                <label><input type="checkbox" class="ana-f" value="sentiment" checked> 긍부정 분석</label>
             </div>
-            <div class="option-row">
-                <label>차트 모드 :</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="tm_chart" value="plotly" checked> 인터랙티브</label>
-                    <label><input type="radio" name="tm_chart" value="static"> 정적 이미지</label>
-                </div>
-            </div>
-            <button class="btn" onclick="runAnalysis('textmining')" disabled data-tab="textmining">분석 시작</button>
         </div>
-        <div class="result-area" id="result-textmining"></div>
+
+        <button class="btn" id="submitBtn" onclick="submit()" disabled>분석 시작</button>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div class="result-section" id="resultSection">
+        <div class="card" id="resultSummary"></div>
+        <div id="resultCharts"></div>
+        <div class="card" id="resultDetails" style="display:none;"></div>
+        <div class="card" id="resultDownloads" style="display:none;"></div>
     </div>
 </div>
 
-<footer style="text-align:center;padding:24px;color:#999;font-size:12px;">AI 그로스팀 데이터 분석 도구 — 이커머스 클래스 Chapter 4</footer>
+<footer style="text-align:center;padding:24px;color:#999;font-size:12px;">AI 그로스팀 데이터 분석 도구 — 이커머스 클래스</footer>
 
 <script>
-/* ===== 탭 전환 ===== */
-function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('panel-' + tab).classList.add('active');
+function onTypeChange() {
+    const t = document.getElementById('analysisType').value;
+    document.getElementById('tcpOptions').classList.toggle('show', t === 'tcp');
+    document.getElementById('tmOptions').classList.toggle('show', t === 'textmining');
 }
 
-/* ===== 파일 업로드 ===== */
-document.querySelectorAll('.file-upload-zone').forEach(zone => {
-    const input = zone.querySelector('.file-input');
-    const nameDiv = zone.querySelector('.file-name');
-    const tab = zone.dataset.tab;
-    const btn = document.querySelector(`button[data-tab="${tab}"]`);
-
-    zone.addEventListener('click', e => { if (e.target !== input) input.click(); });
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-    zone.addEventListener('drop', e => {
-        e.preventDefault(); zone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; fileSelected(input, nameDiv, btn, tab); }
-    });
-    input.addEventListener('change', () => fileSelected(input, nameDiv, btn, tab));
-});
-
-function fileSelected(input, nameDiv, btn, tab) {
+function onFileChange() {
+    const input = document.getElementById('fileInput');
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
     if (input.files.length) {
-        nameDiv.textContent = '📎 ' + input.files[0].name;
-        btn.disabled = false;
-        if (tab === 'tcp') document.getElementById('tcp-colmap').style.display = 'grid';
+        const f = input.files[0];
+        const size = f.size < 1024*1024 ? (f.size/1024).toFixed(1)+'KB' : (f.size/1024/1024).toFixed(1)+'MB';
+        list.innerHTML = `<div class="file-item"><span class="fname">${f.name}</span><span class="fsize">${size}</span><button class="fremove" onclick="removeFile()">✕</button></div>`;
+        document.getElementById('submitBtn').disabled = false;
     }
 }
 
-/* ===== 분석 실행 ===== */
-async function runAnalysis(tab) {
-    const zone = document.querySelector(`.file-upload-zone[data-tab="${tab}"]`);
-    const input = zone.querySelector('.file-input');
-    const chartMode = document.querySelector(`input[name="${tab}_chart"]:checked`)?.value || 'plotly';
+function removeFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileList').innerHTML = '';
+    document.getElementById('submitBtn').disabled = true;
+}
+
+const NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA',tcp:'TCP/RFM',textmining:'텍스트 마이닝'};
+
+async function submit() {
+    const tab = document.getElementById('analysisType').value;
+    const input = document.getElementById('fileInput');
+    const chartMode = document.getElementById('chartMode').value;
     if (!input.files.length) return;
 
     const fd = new FormData();
@@ -330,97 +223,90 @@ async function runAnalysis(tab) {
 
     if (tab === 'tcp') {
         ['date','customer','product','quantity','price'].forEach(k => {
-            const sel = document.getElementById('tcp-' + k);
-            if (sel) fd.append(k + '_col', sel.value || '');
+            fd.append(k+'_col', document.getElementById('tcp-'+k)?.value || '');
         });
     }
     if (tab === 'textmining') {
         fd.append('n_topics', document.getElementById('tm-topics')?.value || '5');
         fd.append('top_n', document.getElementById('tm-topn')?.value || '20');
-        fd.append('pos_filter', [...document.querySelectorAll('.pos-filter:checked')].map(c => c.value).join(',') || 'NNG,NNP');
-        fd.append('analyses', [...document.querySelectorAll('.analysis-chk:checked')].map(c => c.value).join(',') || 'tfidf');
+        fd.append('pos_filter', [...document.querySelectorAll('.pos-f:checked')].map(c=>c.value).join(',') || 'NNG,NNP');
+        fd.append('analyses', [...document.querySelectorAll('.ana-f:checked')].map(c=>c.value).join(',') || 'tfidf');
     }
 
-    showLoading(true, tab);
-    const btn = document.querySelector(`button[data-tab="${tab}"]`);
-    btn.disabled = true;
+    // 로딩
+    const el = document.getElementById('loading');
+    document.getElementById('loadingText').textContent = (NAMES[tab]||tab) + ' 분석 중...';
+    el.classList.add('show');
+    document.getElementById('submitBtn').disabled = true;
 
     try {
-        const resp = await fetch('/api/' + tab, { method: 'POST', body: fd });
+        const resp = await fetch('/api/' + tab, {method:'POST', body:fd});
         const data = await resp.json();
-        if (data.status === 'ok') renderResult(tab, data, chartMode);
+        if (data.status === 'ok') renderResult(data, chartMode);
         else alert('분석 오류: ' + (data.message || '알 수 없는 오류'));
-    } catch (e) {
+    } catch(e) {
         alert('네트워크 오류: ' + e.message);
     } finally {
-        showLoading(false);
-        btn.disabled = false;
+        el.classList.remove('show');
+        document.getElementById('submitBtn').disabled = false;
     }
 }
 
-const TAB_NAMES = { classify:'리뷰 분류', sentiment:'감성 분석', eda:'EDA', tcp:'TCP/RFM', textmining:'텍스트 마이닝' };
-
-function showLoading(show, tab) {
-    const el = document.getElementById('loading');
-    if (tab) document.getElementById('loadingText').textContent = (TAB_NAMES[tab] || tab) + ' 분석 중...';
-    el.classList.toggle('show', show);
-}
-
-/* ===== 결과 렌더링 ===== */
-function renderResult(tab, data, chartMode) {
-    const area = document.getElementById('result-' + tab);
-    area.innerHTML = '';
-    area.classList.add('show');
+function renderResult(data, chartMode) {
+    const section = document.getElementById('resultSection');
+    section.classList.add('show');
+    section.style.display = 'block';
 
     // 요약
-    if (data.summary_html) {
-        area.innerHTML += `<div class="card"><h2>분석 결과</h2>${data.summary_html}</div>`;
-    }
+    const summary = document.getElementById('resultSummary');
+    summary.innerHTML = data.summary_html ? `<h2>분석 결과</h2>${data.summary_html}` : '';
 
     // 차트
+    const charts = document.getElementById('resultCharts');
+    charts.innerHTML = '';
     if (data.charts) {
         data.charts.forEach((chart, i) => {
             const box = document.createElement('div');
-            box.className = 'chart-box';
+            box.className = 'chart-card';
             if (chart.title) box.innerHTML += `<h3>${chart.title}</h3>`;
 
-            const plotlyData = chart.plotly || (chart.type === 'plotly' ? JSON.parse(chart.data) : null);
-            const imageData = chart.image || (chart.type === 'image' ? chart.data : null);
+            const pData = chart.plotly || (chart.type==='plotly' ? JSON.parse(chart.data) : null);
+            const iData = chart.image || (chart.type==='image' ? chart.data : null);
 
-            if (chartMode === 'plotly' && plotlyData) {
-                const plotDiv = document.createElement('div');
-                plotDiv.id = `chart-${tab}-${i}`;
-                box.appendChild(plotDiv);
-                area.appendChild(box);
-                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
-            } else if (imageData) {
-                box.innerHTML += `<img src="data:image/png;base64,${imageData}">`;
-                area.appendChild(box);
-            } else if (plotlyData) {
-                const plotDiv = document.createElement('div');
-                plotDiv.id = `chart-${tab}-${i}`;
-                box.appendChild(plotDiv);
-                area.appendChild(box);
-                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
+            if (chartMode==='plotly' && pData) {
+                const d = document.createElement('div'); d.id = 'ch-'+i;
+                box.appendChild(d); charts.appendChild(box);
+                Plotly.newPlot(d.id, pData.data, pData.layout, {responsive:true});
+            } else if (iData) {
+                box.innerHTML += `<img src="data:image/png;base64,${iData}">`;
+                charts.appendChild(box);
+            } else if (pData) {
+                const d = document.createElement('div'); d.id = 'ch-'+i;
+                box.appendChild(d); charts.appendChild(box);
+                Plotly.newPlot(d.id, pData.data, pData.layout, {responsive:true});
             }
         });
     }
 
     // 상세
+    const details = document.getElementById('resultDetails');
     if (data.details_html) {
-        area.innerHTML += `<div class="card"><h2>상세 결과</h2>${data.details_html}</div>`;
-    }
+        details.innerHTML = `<h2>상세 결과</h2>${data.details_html}`;
+        details.style.display = 'block';
+    } else { details.style.display = 'none'; }
 
     // 다운로드
-    if (data.job_id && data.downloads) {
-        let dl = '<div class="card"><h2>다운로드</h2>';
+    const dl = document.getElementById('resultDownloads');
+    if (data.job_id && data.downloads && data.downloads.length) {
+        let html = '<h2>다운로드</h2>';
         data.downloads.forEach(f => {
-            dl += `<a href="/api/download/${data.job_id}/${f.filename}" class="btn-download">⬇ ${f.label}</a>`;
+            html += `<a href="/api/download/${data.job_id}/${f.filename}" class="download-btn">⬇ ${f.label}</a>`;
         });
-        area.innerHTML += dl + '</div>';
-    }
+        dl.innerHTML = html;
+        dl.style.display = 'block';
+    } else { dl.style.display = 'none'; }
 
-    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    section.scrollIntoView({behavior:'smooth', block:'start'});
 }
 </script>
 </body>
