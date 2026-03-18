@@ -4,296 +4,424 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>이커머스 데이터 분석</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Pretendard', -apple-system, 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #28251D; }
+
+        .header { background: #01696F; color: white; padding: 24px 0; }
+        .header h1 { max-width: 900px; margin: 0 auto; padding: 0 20px; font-size: 24px; }
+        .header p { max-width: 900px; margin: 4px auto 0; padding: 0 20px; opacity: 0.8; font-size: 14px; }
+
+        .container { max-width: 900px; margin: 32px auto; padding: 0 20px; }
+
+        /* 탭 네비게이션 */
+        .tab-nav { display: flex; gap: 0; border-bottom: 2px solid #E8F5F5; margin-bottom: 24px; overflow-x: auto; }
+        .tab-btn { background: none; border: none; padding: 12px 20px; font-size: 14px; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.2s; }
+        .tab-btn:hover { color: #01696F; }
+        .tab-btn.active { color: #01696F; border-bottom-color: #01696F; }
+
+        /* 카드 */
+        .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .card h2 { color: #01696F; font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #E8F5F5; }
+        .card h3 { color: #333; font-size: 15px; margin: 16px 0 8px; }
+
+        /* 폼 요소 */
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #333; }
+        select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; background: white; }
+        select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
+
+        /* 파일 업로드 */
+        .file-upload-zone { border: 1px dashed #ccc; border-radius: 8px; padding: 24px; margin-bottom: 16px; background: #fafafa; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .file-upload-zone:hover, .file-upload-zone.dragover { border-color: #01696F; background: #E8F5F5; }
+        .file-upload-zone .icon { font-size: 32px; margin-bottom: 8px; }
+        .file-upload-zone p { color: #999; font-size: 13px; }
+        .file-upload-zone .file-name { color: #01696F; font-weight: 600; margin-top: 8px; font-size: 14px; }
+
+        /* 옵션 */
+        .option-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .option-row label { margin-bottom: 0; font-size: 13px; }
+        .radio-group { display: flex; gap: 16px; }
+        .radio-group label { display: flex; align-items: center; gap: 4px; font-weight: 400; cursor: pointer; }
+        .radio-group input { margin: 0; }
+
+        .checkbox-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .checkbox-group label { display: flex; align-items: center; gap: 4px; font-weight: 400; font-size: 13px; cursor: pointer; }
+
+        .range-row { display: flex; gap: 24px; margin-bottom: 12px; }
+        .range-row > div { flex: 1; }
+        .range-row input[type="range"] { width: 100%; }
+        .range-row small { color: #999; font-size: 12px; }
+
+        /* 버튼 */
+        .btn { background: #01696F; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
+        .btn:hover { background: #015258; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .btn-download { display: inline-block; background: #01696F; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin: 4px 8px 4px 0; font-weight: 600; font-size: 13px; }
+        .btn-download:hover { background: #015258; }
+
+        /* 결과 영역 */
+        .result-area { display: none; }
+        .result-area.show { display: block; }
+
+        .chart-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
+        .chart-box h3 { color: #01696F; font-size: 15px; margin-bottom: 12px; }
+        .chart-box img { max-width: 100%; height: auto; border-radius: 4px; }
+
+        .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+        .summary-table th { background: #E8F5F5; color: #01696F; font-weight: 600; padding: 10px 12px; text-align: left; }
+        .summary-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+        .summary-table tr:hover td { background: #fafafa; }
+
+        /* 아코디언 */
+        details { border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; }
+        details summary { padding: 10px 14px; font-weight: 600; font-size: 14px; cursor: pointer; color: #333; }
+        details summary:hover { color: #01696F; }
+        details[open] summary { border-bottom: 1px solid #eee; }
+        details .detail-body { padding: 12px 14px; font-size: 13px; color: #555; max-height: 300px; overflow-y: auto; }
+
+        /* 로딩 */
+        .loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
+        .loading.show { display: flex; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #E8F5F5; border-top: 4px solid #01696F; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { margin-top: 16px; color: #01696F; font-weight: 600; font-size: 14px; }
+
+        /* 탭 콘텐츠 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* TCP 컬럼 매핑 */
+        .col-map { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .col-map label { font-size: 12px; margin-bottom: 4px; }
+        .col-map select { margin-bottom: 0; font-size: 13px; padding: 8px; }
+
+        /* 반응형 */
+        @media (max-width: 600px) {
+            .tab-btn { padding: 10px 12px; font-size: 12px; }
+            .card { padding: 20px; }
+            .option-row { flex-direction: column; gap: 8px; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- 헤더 -->
-<div class="header-gradient">
-    <div class="container">
-        <h1><i class="fas fa-chart-bar"></i> 이커머스 데이터 분석</h1>
-        <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA · TCP/RFM · 텍스트 마이닝</p>
-    </div>
+<div class="header">
+    <h1>이커머스 데이터 분석</h1>
+    <p>AI 그로스팀 — 리뷰 분류 · 감성 분석 · EDA · TCP/RFM · 텍스트 마이닝</p>
 </div>
 
-<!-- 로딩 오버레이 -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner-border" role="status"></div>
+<div class="loading" id="loading">
+    <div class="spinner"></div>
     <p id="loadingText">분석 중입니다...</p>
 </div>
 
 <div class="container">
-    <!-- 탭 네비게이션 (수업 순서) -->
-    <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-classify" type="button">
-                <i class="fas fa-tags"></i> 리뷰 분류
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sentiment" type="button">
-                <i class="fas fa-heart"></i> 감성 분석
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-eda" type="button">
-                <i class="fas fa-search"></i> EDA
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tcp" type="button">
-                <i class="fas fa-users"></i> TCP/RFM
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-textmining" type="button">
-                <i class="fas fa-project-diagram"></i> 텍스트 마이닝
-            </button>
-        </li>
-    </ul>
+    <!-- 탭 네비게이션 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('classify')">리뷰 분류</button>
+        <button class="tab-btn" onclick="switchTab('sentiment')">감성 분석</button>
+        <button class="tab-btn" onclick="switchTab('eda')">EDA</button>
+        <button class="tab-btn" onclick="switchTab('tcp')">TCP / RFM</button>
+        <button class="tab-btn" onclick="switchTab('textmining')">텍스트 마이닝</button>
+    </div>
 
-    <!-- 탭 콘텐츠 -->
-    <div class="tab-content" id="mainTabContent">
-
-        <!-- ============ 탭1: 리뷰 분류 ============ -->
-        <div class="tab-pane fade show active" id="tab-classify">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-tags"></i> 리뷰 분류 (Classify)</div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">리뷰 데이터를 카테고리별로 자동 분류합니다. (고객서비스 > 배송 > 가격 > 품질 > 디자인 > 기능 > 만족도)</p>
-                    <div class="upload-zone" data-tab="classify">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                        <input type="file" class="d-none file-input" accept=".xlsx,.csv">
-                        <div class="file-name"></div>
-                    </div>
-                    <div class="option-panel">
-                        <label>차트 모드:</label>
-                        <div class="form-check form-check-inline ms-2">
-                            <input class="form-check-input chart-mode" type="radio" name="classify_chart" value="plotly" checked>
-                            <label class="form-check-label">인터랙티브 (Plotly)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chart-mode" type="radio" name="classify_chart" value="static">
-                            <label class="form-check-label">정적 이미지</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-analyze" data-api="/api/classify" data-tab="classify" disabled>
-                        <i class="fas fa-play"></i> 분석 시작
-                    </button>
+    <!-- ===== 탭1: 리뷰 분류 ===== -->
+    <div class="tab-content active" id="panel-classify">
+        <div class="card">
+            <h2>리뷰 분류 (Classify)</h2>
+            <p style="color:#999;font-size:13px;margin-bottom:16px;">리뷰 데이터를 카테고리별로 자동 분류합니다. (고객서비스 > 배송 > 가격 > 품질 > 디자인 > 기능 > 만족도)</p>
+            <div class="file-upload-zone" data-tab="classify">
+                <div class="icon">📄</div>
+                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
+                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
+                <div class="file-name"></div>
+            </div>
+            <div class="option-row">
+                <label>차트 모드 :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="classify_chart" value="plotly" checked> 인터랙티브</label>
+                    <label><input type="radio" name="classify_chart" value="static"> 정적 이미지</label>
                 </div>
             </div>
-            <div class="result-area" id="result-classify"></div>
+            <button class="btn" onclick="runAnalysis('classify')" disabled data-tab="classify">분석 시작</button>
         </div>
+        <div class="result-area" id="result-classify"></div>
+    </div>
 
-        <!-- ============ 탭2: 감성 분석 ============ -->
-        <div class="tab-pane fade" id="tab-sentiment">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-heart"></i> 감성 분석 (Sentiment)</div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">텍스트 기반 감성 사전 점수제로 긍정/부정/중립을 분류합니다.</p>
-                    <div class="upload-zone" data-tab="sentiment">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                        <input type="file" class="d-none file-input" accept=".xlsx,.csv">
-                        <div class="file-name"></div>
-                    </div>
-                    <div class="option-panel">
-                        <label>차트 모드:</label>
-                        <div class="form-check form-check-inline ms-2">
-                            <input class="form-check-input chart-mode" type="radio" name="sentiment_chart" value="plotly" checked>
-                            <label class="form-check-label">인터랙티브 (Plotly)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chart-mode" type="radio" name="sentiment_chart" value="static">
-                            <label class="form-check-label">정적 이미지</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-analyze" data-api="/api/sentiment" data-tab="sentiment" disabled>
-                        <i class="fas fa-play"></i> 분석 시작
-                    </button>
+    <!-- ===== 탭2: 감성 분석 ===== -->
+    <div class="tab-content" id="panel-sentiment">
+        <div class="card">
+            <h2>감성 분석 (Sentiment)</h2>
+            <p style="color:#999;font-size:13px;margin-bottom:16px;">텍스트 기반 감성 사전 점수제로 긍정/부정/중립을 분류합니다.</p>
+            <div class="file-upload-zone" data-tab="sentiment">
+                <div class="icon">📄</div>
+                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
+                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
+                <div class="file-name"></div>
+            </div>
+            <div class="option-row">
+                <label>차트 모드 :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="sentiment_chart" value="plotly" checked> 인터랙티브</label>
+                    <label><input type="radio" name="sentiment_chart" value="static"> 정적 이미지</label>
                 </div>
             </div>
-            <div class="result-area" id="result-sentiment"></div>
+            <button class="btn" onclick="runAnalysis('sentiment')" disabled data-tab="sentiment">분석 시작</button>
         </div>
+        <div class="result-area" id="result-sentiment"></div>
+    </div>
 
-        <!-- ============ 탭3: EDA ============ -->
-        <div class="tab-pane fade" id="tab-eda">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-search"></i> 탐색적 데이터 분석 (EDA)</div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">업로드된 데이터의 구조, 기초 통계량, 분포, 상관관계를 자동 분석합니다.</p>
-                    <div class="upload-zone" data-tab="eda">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
-                        <input type="file" class="d-none file-input" accept=".xlsx,.csv">
-                        <div class="file-name"></div>
-                    </div>
-                    <div class="option-panel">
-                        <label>차트 모드:</label>
-                        <div class="form-check form-check-inline ms-2">
-                            <input class="form-check-input chart-mode" type="radio" name="eda_chart" value="plotly" checked>
-                            <label class="form-check-label">인터랙티브 (Plotly)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chart-mode" type="radio" name="eda_chart" value="static">
-                            <label class="form-check-label">정적 이미지</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-analyze" data-api="/api/eda" data-tab="eda" disabled>
-                        <i class="fas fa-play"></i> 분석 시작
-                    </button>
+    <!-- ===== 탭3: EDA ===== -->
+    <div class="tab-content" id="panel-eda">
+        <div class="card">
+            <h2>탐색적 데이터 분석 (EDA)</h2>
+            <p style="color:#999;font-size:13px;margin-bottom:16px;">업로드된 데이터의 구조, 기초 통계량, 분포, 상관관계를 자동 분석합니다.</p>
+            <div class="file-upload-zone" data-tab="eda">
+                <div class="icon">📄</div>
+                <p>엑셀(.xlsx) 또는 CSV 파일을 드래그하거나 클릭하세요</p>
+                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
+                <div class="file-name"></div>
+            </div>
+            <div class="option-row">
+                <label>차트 모드 :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="eda_chart" value="plotly" checked> 인터랙티브</label>
+                    <label><input type="radio" name="eda_chart" value="static"> 정적 이미지</label>
                 </div>
             </div>
-            <div class="result-area" id="result-eda"></div>
+            <button class="btn" onclick="runAnalysis('eda')" disabled data-tab="eda">분석 시작</button>
         </div>
+        <div class="result-area" id="result-eda"></div>
+    </div>
 
-        <!-- ============ 탭4: TCP/RFM ============ -->
-        <div class="tab-pane fade" id="tab-tcp">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-users"></i> TCP / RFM 분석</div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">시간(Time)·고객(Customer)·제품(Product) 분석 + RFM 고객 세그먼트</p>
-                    <div class="upload-zone" data-tab="tcp">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>커머스 데이터 (주문일, 고객ID, 상품명, 수량, 단가 포함) 업로드</p>
-                        <input type="file" class="d-none file-input" accept=".xlsx,.csv">
-                        <div class="file-name"></div>
-                    </div>
-                    <div class="option-panel" id="tcp-columns" style="display:none;">
-                        <div class="row g-2">
-                            <div class="col-md-4">
-                                <label class="form-label">날짜 컬럼</label>
-                                <select class="form-select form-select-sm" id="tcp-date-col"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">고객ID 컬럼</label>
-                                <select class="form-select form-select-sm" id="tcp-customer-col"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">상품 컬럼</label>
-                                <select class="form-select form-select-sm" id="tcp-product-col"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">수량 컬럼</label>
-                                <select class="form-select form-select-sm" id="tcp-quantity-col"></select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">단가 컬럼</label>
-                                <select class="form-select form-select-sm" id="tcp-price-col"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="option-panel">
-                        <label>차트 모드:</label>
-                        <div class="form-check form-check-inline ms-2">
-                            <input class="form-check-input chart-mode" type="radio" name="tcp_chart" value="plotly" checked>
-                            <label class="form-check-label">인터랙티브 (Plotly)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chart-mode" type="radio" name="tcp_chart" value="static">
-                            <label class="form-check-label">정적 이미지</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-analyze" data-api="/api/tcp" data-tab="tcp" disabled>
-                        <i class="fas fa-play"></i> 분석 시작
-                    </button>
+    <!-- ===== 탭4: TCP/RFM ===== -->
+    <div class="tab-content" id="panel-tcp">
+        <div class="card">
+            <h2>TCP / RFM 분석</h2>
+            <p style="color:#999;font-size:13px;margin-bottom:16px;">시간(Time) · 고객(Customer) · 제품(Product) 분석 + RFM 고객 세그먼트</p>
+            <div class="file-upload-zone" data-tab="tcp">
+                <div class="icon">📄</div>
+                <p>커머스 데이터 (주문일, 고객ID, 상품명, 수량, 단가 포함) 업로드</p>
+                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
+                <div class="file-name"></div>
+            </div>
+            <div class="col-map" id="tcp-colmap" style="display:none;">
+                <div><label>날짜 컬럼</label><select id="tcp-date"></select></div>
+                <div><label>고객ID 컬럼</label><select id="tcp-customer"></select></div>
+                <div><label>상품 컬럼</label><select id="tcp-product"></select></div>
+                <div><label>수량 컬럼</label><select id="tcp-quantity"></select></div>
+                <div><label>단가 컬럼</label><select id="tcp-price"></select></div>
+            </div>
+            <div class="option-row">
+                <label>차트 모드 :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tcp_chart" value="plotly" checked> 인터랙티브</label>
+                    <label><input type="radio" name="tcp_chart" value="static"> 정적 이미지</label>
                 </div>
             </div>
-            <div class="result-area" id="result-tcp"></div>
+            <button class="btn" onclick="runAnalysis('tcp')" disabled data-tab="tcp">분석 시작</button>
         </div>
+        <div class="result-area" id="result-tcp"></div>
+    </div>
 
-        <!-- ============ 탭5: 텍스트 마이닝 ============ -->
-        <div class="tab-pane fade" id="tab-textmining">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-project-diagram"></i> 텍스트 마이닝</div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">형태소 분석 · TF-IDF · 토픽 모델링(LDA) · 키워드 네트워크 · 긍부정 분석</p>
-                    <div class="upload-zone" data-tab="textmining">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>텍스트 데이터 (엑셀/CSV/TXT) 업로드</p>
-                        <input type="file" class="d-none file-input" accept=".xlsx,.csv,.txt">
-                        <div class="file-name"></div>
-                    </div>
-                    <div class="option-panel">
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-4">
-                                <label class="form-label">토픽 수</label>
-                                <input type="range" class="form-range" id="tm-topics" min="3" max="10" value="5">
-                                <small class="text-muted">토픽: <span id="tm-topics-val">5</span>개</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">키워드 수</label>
-                                <input type="range" class="form-range" id="tm-topn" min="10" max="50" value="20">
-                                <small class="text-muted">키워드: <span id="tm-topn-val">20</span>개</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">품사 필터</label>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input pos-filter" type="checkbox" value="NNG" checked><label class="form-check-label">명사</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input pos-filter" type="checkbox" value="NNP" checked><label class="form-check-label">고유명사</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input pos-filter" type="checkbox" value="VA"><label class="form-check-label">형용사</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input pos-filter" type="checkbox" value="VV"><label class="form-check-label">동사</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <label class="d-block mb-1">분석 항목:</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input analysis-check" type="checkbox" value="tfidf" checked><label class="form-check-label">TF-IDF</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input analysis-check" type="checkbox" value="lda" checked><label class="form-check-label">토픽 모델링</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input analysis-check" type="checkbox" value="network" checked><label class="form-check-label">키워드 네트워크</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input analysis-check" type="checkbox" value="wordcloud" checked><label class="form-check-label">워드클라우드</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input analysis-check" type="checkbox" value="sentiment" checked><label class="form-check-label">긍부정 분석</label>
-                        </div>
-                    </div>
-                    <div class="option-panel">
-                        <label>차트 모드:</label>
-                        <div class="form-check form-check-inline ms-2">
-                            <input class="form-check-input chart-mode" type="radio" name="tm_chart" value="plotly" checked>
-                            <label class="form-check-label">인터랙티브 (Plotly)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chart-mode" type="radio" name="tm_chart" value="static">
-                            <label class="form-check-label">정적 이미지</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-analyze" data-api="/api/textmining" data-tab="textmining" disabled>
-                        <i class="fas fa-play"></i> 분석 시작
-                    </button>
+    <!-- ===== 탭5: 텍스트 마이닝 ===== -->
+    <div class="tab-content" id="panel-textmining">
+        <div class="card">
+            <h2>텍스트 마이닝</h2>
+            <p style="color:#999;font-size:13px;margin-bottom:16px;">형태소 분석 · TF-IDF · 토픽 모델링(LDA) · 키워드 네트워크 · 긍부정 분석</p>
+            <div class="file-upload-zone" data-tab="textmining">
+                <div class="icon">📄</div>
+                <p>텍스트 데이터 (엑셀/CSV) 업로드</p>
+                <input type="file" accept=".xlsx,.csv" style="display:none" class="file-input">
+                <div class="file-name"></div>
+            </div>
+            <div class="range-row">
+                <div>
+                    <label>토픽 수</label>
+                    <input type="range" id="tm-topics" min="3" max="10" value="5" oninput="document.getElementById('tm-topics-v').textContent=this.value">
+                    <small>토픽: <span id="tm-topics-v">5</span>개</small>
+                </div>
+                <div>
+                    <label>키워드 수</label>
+                    <input type="range" id="tm-topn" min="10" max="50" value="20" oninput="document.getElementById('tm-topn-v').textContent=this.value">
+                    <small>키워드: <span id="tm-topn-v">20</span>개</small>
                 </div>
             </div>
-            <div class="result-area" id="result-textmining"></div>
+            <div style="margin-bottom:12px;">
+                <label>품사 필터</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="pos-filter" value="NNG" checked> 명사</label>
+                    <label><input type="checkbox" class="pos-filter" value="NNP" checked> 고유명사</label>
+                    <label><input type="checkbox" class="pos-filter" value="VA"> 형용사</label>
+                    <label><input type="checkbox" class="pos-filter" value="VV"> 동사</label>
+                </div>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label>분석 항목</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" class="analysis-chk" value="tfidf" checked> TF-IDF</label>
+                    <label><input type="checkbox" class="analysis-chk" value="lda" checked> 토픽 모델링</label>
+                    <label><input type="checkbox" class="analysis-chk" value="network" checked> 키워드 네트워크</label>
+                    <label><input type="checkbox" class="analysis-chk" value="wordcloud" checked> 워드클라우드</label>
+                    <label><input type="checkbox" class="analysis-chk" value="sentiment" checked> 긍부정 분석</label>
+                </div>
+            </div>
+            <div class="option-row">
+                <label>차트 모드 :</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tm_chart" value="plotly" checked> 인터랙티브</label>
+                    <label><input type="radio" name="tm_chart" value="static"> 정적 이미지</label>
+                </div>
+            </div>
+            <button class="btn" onclick="runAnalysis('textmining')" disabled data-tab="textmining">분석 시작</button>
         </div>
+        <div class="result-area" id="result-textmining"></div>
+    </div>
+</div>
 
-    </div><!-- /tab-content -->
-</div><!-- /container -->
+<footer style="text-align:center;padding:24px;color:#999;font-size:12px;">AI 그로스팀 데이터 분석 도구 — 이커머스 클래스 Chapter 4</footer>
 
-<!-- 푸터 -->
-<footer class="text-center py-3 mt-4" style="color:#94a3b8; font-size:0.8rem;">
-    AI 그로스팀 데이터 분석 도구 &mdash; 이커머스 클래스 Chapter 4
-</footer>
+<script>
+/* ===== 탭 전환 ===== */
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/static/js/app.js"></script>
+/* ===== 파일 업로드 ===== */
+document.querySelectorAll('.file-upload-zone').forEach(zone => {
+    const input = zone.querySelector('.file-input');
+    const nameDiv = zone.querySelector('.file-name');
+    const tab = zone.dataset.tab;
+    const btn = document.querySelector(`button[data-tab="${tab}"]`);
+
+    zone.addEventListener('click', e => { if (e.target !== input) input.click(); });
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; fileSelected(input, nameDiv, btn, tab); }
+    });
+    input.addEventListener('change', () => fileSelected(input, nameDiv, btn, tab));
+});
+
+function fileSelected(input, nameDiv, btn, tab) {
+    if (input.files.length) {
+        nameDiv.textContent = '📎 ' + input.files[0].name;
+        btn.disabled = false;
+        if (tab === 'tcp') document.getElementById('tcp-colmap').style.display = 'grid';
+    }
+}
+
+/* ===== 분석 실행 ===== */
+async function runAnalysis(tab) {
+    const zone = document.querySelector(`.file-upload-zone[data-tab="${tab}"]`);
+    const input = zone.querySelector('.file-input');
+    const chartMode = document.querySelector(`input[name="${tab}_chart"]:checked`)?.value || 'plotly';
+    if (!input.files.length) return;
+
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fd.append('chart_mode', chartMode);
+
+    if (tab === 'tcp') {
+        ['date','customer','product','quantity','price'].forEach(k => {
+            const sel = document.getElementById('tcp-' + k);
+            if (sel) fd.append(k + '_col', sel.value || '');
+        });
+    }
+    if (tab === 'textmining') {
+        fd.append('n_topics', document.getElementById('tm-topics')?.value || '5');
+        fd.append('top_n', document.getElementById('tm-topn')?.value || '20');
+        fd.append('pos_filter', [...document.querySelectorAll('.pos-filter:checked')].map(c => c.value).join(',') || 'NNG,NNP');
+        fd.append('analyses', [...document.querySelectorAll('.analysis-chk:checked')].map(c => c.value).join(',') || 'tfidf');
+    }
+
+    showLoading(true, tab);
+    const btn = document.querySelector(`button[data-tab="${tab}"]`);
+    btn.disabled = true;
+
+    try {
+        const resp = await fetch('/api/' + tab, { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (data.status === 'ok') renderResult(tab, data, chartMode);
+        else alert('분석 오류: ' + (data.message || '알 수 없는 오류'));
+    } catch (e) {
+        alert('네트워크 오류: ' + e.message);
+    } finally {
+        showLoading(false);
+        btn.disabled = false;
+    }
+}
+
+const TAB_NAMES = { classify:'리뷰 분류', sentiment:'감성 분석', eda:'EDA', tcp:'TCP/RFM', textmining:'텍스트 마이닝' };
+
+function showLoading(show, tab) {
+    const el = document.getElementById('loading');
+    if (tab) document.getElementById('loadingText').textContent = (TAB_NAMES[tab] || tab) + ' 분석 중...';
+    el.classList.toggle('show', show);
+}
+
+/* ===== 결과 렌더링 ===== */
+function renderResult(tab, data, chartMode) {
+    const area = document.getElementById('result-' + tab);
+    area.innerHTML = '';
+    area.classList.add('show');
+
+    // 요약
+    if (data.summary_html) {
+        area.innerHTML += `<div class="card"><h2>분석 결과</h2>${data.summary_html}</div>`;
+    }
+
+    // 차트
+    if (data.charts) {
+        data.charts.forEach((chart, i) => {
+            const box = document.createElement('div');
+            box.className = 'chart-box';
+            if (chart.title) box.innerHTML += `<h3>${chart.title}</h3>`;
+
+            const plotlyData = chart.plotly || (chart.type === 'plotly' ? JSON.parse(chart.data) : null);
+            const imageData = chart.image || (chart.type === 'image' ? chart.data : null);
+
+            if (chartMode === 'plotly' && plotlyData) {
+                const plotDiv = document.createElement('div');
+                plotDiv.id = `chart-${tab}-${i}`;
+                box.appendChild(plotDiv);
+                area.appendChild(box);
+                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
+            } else if (imageData) {
+                box.innerHTML += `<img src="data:image/png;base64,${imageData}">`;
+                area.appendChild(box);
+            } else if (plotlyData) {
+                const plotDiv = document.createElement('div');
+                plotDiv.id = `chart-${tab}-${i}`;
+                box.appendChild(plotDiv);
+                area.appendChild(box);
+                Plotly.newPlot(plotDiv.id, plotlyData.data, plotlyData.layout, { responsive: true });
+            }
+        });
+    }
+
+    // 상세
+    if (data.details_html) {
+        area.innerHTML += `<div class="card"><h2>상세 결과</h2>${data.details_html}</div>`;
+    }
+
+    // 다운로드
+    if (data.job_id && data.downloads) {
+        let dl = '<div class="card"><h2>다운로드</h2>';
+        data.downloads.forEach(f => {
+            dl += `<a href="/api/download/${data.job_id}/${f.filename}" class="btn-download">⬇ ${f.label}</a>`;
+        });
+        area.innerHTML += dl + '</div>';
+    }
+
+    area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
 </body>
 </html>
