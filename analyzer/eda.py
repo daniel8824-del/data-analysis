@@ -1,4 +1,4 @@
-"""EDA (탐색적 데이터 분석) 모듈 — 업로드된 데이터프레임을 자동 분석."""
+"""EDA (탐색적 데이터 분석) 모듈 - 업로드된 데이터프레임을 자동 분석."""
 import os
 import logging
 import traceback

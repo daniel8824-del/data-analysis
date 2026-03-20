@@ -1,4 +1,4 @@
-"""TCP/RFM 분석 모듈 — 시간(Time)·고객(Customer)·제품(Product) + RFM 세그먼트."""
+"""TCP/RFM 분석 모듈 - 시간(Time)·고객(Customer)·제품(Product) + RFM 세그먼트."""
 import os
 import json
 import logging
@@ -63,7 +63,7 @@ def detect_commerce_columns(df: pd.DataFrame) -> dict:
         if any(k in cl for k in ["date", "날짜", "일자", "invoicedate", "orderdate", "order_date"]):
             mapping.setdefault("date", col)
         elif cl in ("invoice", "invoiceno", "invoice_no") and "date" not in mapping:
-            pass  # InvoiceNo는 날짜가 아님 — 건너뜀
+            pass  # InvoiceNo는 날짜가 아님 - 건너뜀
         elif any(k in cl for k in ["customer", "고객", "회원", "user"]):
             mapping.setdefault("customer", col)
         elif any(k in cl for k in ["product", "상품", "제품", "item", "description", "stock"]):

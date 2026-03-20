@@ -1,4 +1,4 @@
-"""감성 분석 모듈 — 사전 기반 한국어 감성 분석."""
+"""감성 분석 모듈 - 사전 기반 한국어 감성 분석."""
 import os
 import json
 import logging
@@ -80,7 +80,7 @@ def _build_donut_chart(counts: dict, chart_mode: str) -> dict:
     if chart_mode == "plotly":
         return {"title": "감성 분석 비율", "plotly": json.loads(plotly_to_json(fig))}
     else:
-        # base64 fallback — matplotlib donut
+        # base64 fallback - matplotlib donut
         setup_matplotlib_korean()
         mfig, ax = plt.subplots(figsize=(6, 4))
         wedges, texts, autotexts = ax.pie(
@@ -97,8 +97,8 @@ def _build_wordcloud_chart(keyword_freq: dict, keyword_scores: dict) -> dict:
     """감성 키워드 워드클라우드 (항상 base64 이미지로 반환).
 
     Args:
-        keyword_freq: {word: occurrence_count} — 워드클라우드 크기 결정
-        keyword_scores: {word: lexicon_score} — 워드클라우드 색상 결정
+        keyword_freq: {word: occurrence_count} - 워드클라우드 크기 결정
+        keyword_scores: {word: lexicon_score} - 워드클라우드 색상 결정
     """
     if not keyword_freq:
         return None

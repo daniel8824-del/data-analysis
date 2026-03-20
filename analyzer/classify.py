@@ -1,4 +1,4 @@
-"""리뷰 분류 모듈 — 키워드 기반 카테고리 분류."""
+"""리뷰 분류 모듈 - 키워드 기반 카테고리 분류."""
 import os
 import json
 import pandas as pd
@@ -177,7 +177,7 @@ def run_classification(df: pd.DataFrame, job_id: str, chart_mode: str = "plotly"
         charts.append({"title": "카테고리별 리뷰 수", "image": fig_to_base64(fig_b)})
 
     # -----------------------------------------------------------------------
-    # 상세 결과 — 카테고리별 대표 리뷰 아코디언
+    # 상세 결과 - 카테고리별 대표 리뷰 아코디언
     # -----------------------------------------------------------------------
     accordion_id = "classifyAccordion"
     accordion_items = ""

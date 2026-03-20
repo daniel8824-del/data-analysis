@@ -1,4 +1,4 @@
-"""텍스트 마이닝 모듈 — TF-IDF, LDA, 키워드 네트워크, 워드클라우드, 감성 분석."""
+"""텍스트 마이닝 모듈 - TF-IDF, LDA, 키워드 네트워크, 워드클라우드, 감성 분석."""
 import os
 import json
 import logging
@@ -104,7 +104,7 @@ def _chart_entry(title, fig, chart_mode):
     if chart_mode == "plotly":
         return {"title": title, "plotly": json.loads(plotly_to_json(fig))}
     else:
-        # matplotlib static fallback — Plotly figure를 이미지로 변환
+        # matplotlib static fallback - Plotly figure를 이미지로 변환
         try:
             img_bytes = fig.to_image(format="png", width=800, height=500)
             import base64
@@ -150,7 +150,7 @@ def run_textmining(
     total_docs = len(texts)
 
     # ----- 형태소 분석 -----
-    logger.info(f"[텍스트마이닝] 형태소 분석 시작 — {total_docs}건")
+    logger.info(f"[텍스트마이닝] 형태소 분석 시작 - {total_docs}건")
     tokenized = tokenize_texts(texts, pos_filter, STOPWORDS)
 
     # 전체 단어 빈도
@@ -272,7 +272,7 @@ def run_textmining(
             )
             charts.append(_chart_entry("토픽 점유율", fig_donut, chart_mode))
 
-            # 상세 — 토픽 키워드 테이블
+            # 상세 - 토픽 키워드 테이블
             topic_rows = ""
             for tname, twords in topic_keywords.items():
                 cnt = topic_values[int(tname.split()[-1]) - 1]
@@ -333,7 +333,7 @@ def run_textmining(
                 if count >= 2 and w1 in top_words_set and w2 in top_words_set:
                     G.add_edge(w1, w2, weight=count)
 
-            # 고립 노드 제거 — 엣지가 있는 노드만 유지
+            # 고립 노드 제거 - 엣지가 있는 노드만 유지
             isolated = list(nx.isolates(G))
             G.remove_nodes_from(isolated)
 
@@ -405,7 +405,7 @@ def run_textmining(
             )
             charts.append(_chart_entry("중심성 분석 TOP 10", fig_cent, chart_mode))
 
-            # 상세 — 중심성 테이블
+            # 상세 - 중심성 테이블
             cent_rows = ""
             for rank, (word, dc) in enumerate(
                 sorted(degree_cent.items(), key=lambda x: x[1], reverse=True)[:15], 1
@@ -484,11 +484,11 @@ def run_textmining(
             def _sentiment_color_func(word, **kwargs):
                 score = sentiment_lex.get(word, 0)
                 if score > 0:
-                    return "#22C55E"  # 긍정 — 녹색
+                    return "#22C55E"  # 긍정 - 녹색
                 elif score < 0:
-                    return "#EF4444"  # 부정 — 빨간색
+                    return "#EF4444"  # 부정 - 빨간색
                 else:
-                    return "#9CA3AF"  # 중립 — 회색
+                    return "#9CA3AF"  # 중립 - 회색
 
             wc_sent = WordCloud(
                 font_path=font_path,

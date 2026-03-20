@@ -1,4 +1,4 @@
-"""공용 차트 유틸리티 — Plotly / matplotlib 차트 생성."""
+"""공용 차트 유틸리티 - Plotly / matplotlib 차트 생성."""
 import os
 import io
 import base64
