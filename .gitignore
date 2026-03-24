@@ -4,3 +4,5 @@ uploads/
 results/
 .env
 *.egg-info/
+.venv/
+.omc/

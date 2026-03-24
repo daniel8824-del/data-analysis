@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이커머스 데이터 자동 분석</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f8f9fa; color: #28251D; }
+
+        .header { background: #01696F; color: white; padding: 24px 0; }
+        .header h1 { max-width: 800px; margin: 0 auto; padding: 0 20px; font-size: 24px; }
+        .header p { max-width: 800px; margin: 4px auto 0; padding: 0 20px; opacity: 0.8; font-size: 14px; }
+
+        .container { max-width: 800px; margin: 32px auto; padding: 0 20px; }
+
+        .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .card h2 { color: #01696F; font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #E8F5F5; }
+
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #333; }
+        input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #01696F; box-shadow: 0 0 0 3px rgba(1,105,111,0.1); }
+        select { background: white; }
+
+        .row { display: flex; gap: 16px; }
+        .row > * { flex: 1; }
+
+        .btn { background: #01696F; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
+        .btn:hover { background: #015258; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .file-upload-zone { border: 1px dashed #ccc; border-radius: 8px; padding: 12px; margin-bottom: 16px; background: #fafafa; }
+        .file-add-btn { background: #E8F5F5; color: #01696F; border: 1px solid #01696F; border-radius: 6px; padding: 6px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .file-add-btn:hover { background: #01696F; color: white; }
+        .file-list { margin-top: 8px; }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 13px; color: #555; background: white; border-radius: 4px; margin-top: 4px; }
+        .file-item .file-name { flex: 1; }
+        .file-item .file-size { color: #999; margin: 0 12px; }
+        .file-item .file-remove { color: #e74c3c; cursor: pointer; font-weight: 600; border: none; background: none; font-size: 14px; }
+
+        .result-section { display: none; font-size: 13px; }
+        .result-section .card h2 { font-size: 15px; margin-bottom: 14px; padding-bottom: 10px; }
+        .download-btn { display: inline-block; background: #01696F; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin: 6px 6px 6px 0; font-weight: 600; font-size: 13px; }
+        .download-btn:hover { background: #015258; }
+
+        /* 결과 테이블 */
+        .result-section table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 2px; }
+        .result-section th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #01696F; border-right: 1px solid #e8e8e8; font-size: 12px; color: #555; font-weight: 600; }
+        .result-section th:last-child { border-right: none; }
+        .result-section td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; border-right: 1px solid #f0f0f0; }
+        .result-section td:last-child { border-right: none; }
+        .result-section tbody tr:hover { background: #f8fffe; }
+        .result-section tfoot td { border-top: 2px solid #01696F; border-bottom: none; font-weight: 700; padding-top: 8px; }
+
+        /* 차트 이미지 */
+        .result-section .card img { max-width: 100%; border-radius: 4px; }
+
+        /* 아코디언 (상세 결과) */
+        .acc-item { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+        .acc-btn { width: 100%; text-align: left; padding: 10px 14px; background: #fafafa; border: none; font-size: 13px; font-weight: 600; cursor: pointer; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .acc-btn:hover { background: #f0f9f9; }
+        .acc-btn::after { content: '+'; font-size: 16px; color: #999; transition: transform 0.2s; }
+        .acc-btn.open::after { content: '-'; }
+        .acc-body { display: none; padding: 10px 14px; border-top: 1px solid #eee; }
+        .acc-body.open { display: block; }
+        .acc-review { padding: 6px 0; border-bottom: 1px solid #f3f3f3; font-size: 12px; color: #555; line-height: 1.5; }
+        .acc-review:last-child { border-bottom: none; }
+
+        /* AI 인사이트 채팅 */
+        .chat-messages { overflow-y: auto; margin-bottom: 12px; }
+        .chat-msg { display: flex; margin-bottom: 10px; }
+        .chat-msg.ai { justify-content: flex-start; }
+        .chat-msg.user { justify-content: flex-end; }
+        .chat-bubble { max-width: 100%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.7; }
+        .chat-bubble.ai { background: #f0f9f9; color: #333; border-bottom-left-radius: 4px; }
+        .chat-bubble.user { background: #01696F; color: white; border-bottom-right-radius: 4px; max-width: 85%; }
+        .chat-bubble p { margin: 6px 0; }
+        .chat-bubble ul, .chat-bubble ol { margin: 6px 0 6px 18px; }
+        .chat-bubble strong { color: #015258; }
+        .chat-bubble h1, .chat-bubble h2, .chat-bubble h3, .chat-bubble h4 { font-size: 14px; font-weight: 700; color: #01696F; margin: 12px 0 4px; border: none; padding: 0; }
+        .chat-bubble hr { display: none; }
+        .chat-bubble table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+        .chat-bubble th, .chat-bubble td { padding: 4px 8px; border-bottom: 1px solid #ddd; text-align: left; }
+        .chat-bubble th { font-weight: 600; border-bottom: 2px solid #01696F; }
+        .chat-input-row { display: flex; gap: 8px; }
+        .chat-input-row input { margin-bottom: 0; flex: 1; }
+        .chat-input-row button { width: auto; padding: 10px 20px; font-size: 14px; }
+        .chat-label { font-size: 11px; color: #999; margin-top: 10px; }
+
+        .extra-options { display: none; margin-bottom: 16px; }
+        .extra-options.show { display: block; }
+        .extra-options > label { font-size: 14px; margin-bottom: 10px; }
+        .check-row { display: flex; gap: 10px 24px; flex-wrap: wrap; margin-bottom: 8px; }
+        .check-row label { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; font-size: 14px; cursor: pointer; margin-bottom: 0; white-space: nowrap; line-height: 1; }
+        .check-row input[type="checkbox"] { margin: 0; width: 15px; height: 15px; vertical-align: middle; flex-shrink: 0; }
+
+        .btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top: 2px solid white; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>이커머스 데이터 자동 분석</h1>
+        <p>AI 그로스팀 - 리뷰 분류 · 감성 분석 · EDA 분석 · 커머스 분석 · 텍스트 분석</p>
+    </div>
+
+    <div class="container">
+        <form id="analysisForm" class="card">
+            <h2>데이터 분석</h2>
+
+            <label>분석 유형</label>
+            <select id="analysisType" onchange="onTypeChange()">
+                <option value="classify">리뷰 분석 - 카테고리별 분류</option>
+                <option value="sentiment">감성 분석 - 긍정/중립/부정 분류</option>
+                <option value="eda">EDA 분석 - 탐색적 데이터 분석 실습</option>
+                <option value="tcp">커머스 분석 - 시간/고객/상품 분석</option>
+                <option value="textmining">텍스트 분석 - TF-IDF/LDA/키워드 네트워크</option>
+            </select>
+
+            <label>데이터 파일</label>
+            <div class="file-upload-zone">
+                <button type="button" class="file-add-btn" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
+                <input type="file" id="fileInput" accept=".xlsx,.csv,.pdf,.txt,.doc,.docx,.ppt,.pptx" style="display:none" onchange="onFileChange()">
+                <div id="fileList" class="file-list"></div>
+            </div>
+
+            <!-- 커머스 분석 옵션 -->
+            <div class="extra-options" id="tcpOpts">
+                <label>분석 기준</label>
+                <div class="check-row">
+                    <label><input type="checkbox" class="tcp-dim" value="time" checked> 시간 분석</label>
+                    <label><input type="checkbox" class="tcp-dim" value="customer" checked> 고객 분석</label>
+                    <label><input type="checkbox" class="tcp-dim" value="product" checked> 상품 분석</label>
+                </div>
+            </div>
+
+            <!-- 텍스트 분석 옵션 -->
+            <div class="extra-options" id="tmOpts">
+                <label>품사 선택</label>
+                <div class="check-row">
+                    <label><input type="checkbox" class="pos-f" value="NNG" checked> 명사</label>
+                    <label><input type="checkbox" class="pos-f" value="NNP" checked> 고유명사</label>
+                    <label><input type="checkbox" class="pos-f" value="VA"> 형용사</label>
+                    <label><input type="checkbox" class="pos-f" value="VV"> 동사</label>
+                    <label><input type="checkbox" class="pos-f" value="MAG"> 부사</label>
+                </div>
+            </div>
+
+            <button type="button" class="btn" id="submitBtn" onclick="submitAnalysis()" disabled>분석 시작</button>
+        </form>
+
+        <!-- 결과 -->
+        <div id="resultSection" class="result-section"></div>
+
+        <!-- AI 인사이트 -->
+        <div id="insightSection" class="card" style="display:none;">
+            <h2>AI 인사이트</h2>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" placeholder="추가 질문을 입력하세요..." onkeypress="if(event.key==='Enter')sendChat()">
+                <button type="button" class="btn" onclick="sendChat()">전송</button>
+            </div>
+            <div class="chat-label">Claude Sonnet 4.6 기반 · 분석 데이터 범위 내에서 답변합니다</div>
+        </div>
+    </div>
+
+    <script>
+        function onTypeChange() {
+            var t = document.getElementById('analysisType').value;
+            document.getElementById('tcpOpts').className = 'extra-options' + (t === 'tcp' ? ' show' : '');
+            document.getElementById('tmOpts').className = 'extra-options' + (t === 'textmining' ? ' show' : '');
+            document.getElementById('resultSection').innerHTML = '';
+            document.getElementById('resultSection').style.display = 'none';
+            removeFile();
+        }
+
+        function onFileChange() {
+            var input = document.getElementById('fileInput');
+            var list = document.getElementById('fileList');
+            list.innerHTML = '';
+            if (input.files.length) {
+                var f = input.files[0];
+                var size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+'MB' : (f.size/1024).toFixed(0)+'KB';
+                list.innerHTML = '<div class="file-item"><span class="file-name">' + f.name + '</span><span class="file-size">' + size + '</span><button type="button" class="file-remove" onclick="removeFile()">X</button></div>';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+
+        function removeFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function toggleAcc(btn) {
+            var body = btn.nextElementSibling;
+            var isOpen = btn.classList.contains('open');
+            btn.classList.toggle('open', !isOpen);
+            body.classList.toggle('open', !isOpen);
+        }
+
+        var NAMES = {classify:'리뷰 분류',sentiment:'감성 분석',eda:'EDA 분석',tcp:'커머스 분석',textmining:'텍스트 분석'};
+        var currentJobId = null;
+        var chatHistory = [];
+
+        function renderMd(text) {
+            try { return marked.parse(text); } catch(e) { return text.replace(/\n/g, '<br>'); }
+        }
+
+        async function initInsight(jobId) {
+            currentJobId = jobId;
+            chatHistory = [];
+            var section = document.getElementById('insightSection');
+            section.style.display = 'block';
+            var msgs = document.getElementById('chatMessages');
+            msgs.innerHTML = '<div class="chat-msg ai"><div class="chat-bubble ai">분석 결과를 해석하고 있습니다...</div></div>';
+
+            try {
+                var resp = await fetch('/api/insight/init', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({job_id: jobId})
+                });
+                var data = await resp.json();
+                if (data.status === 'ok') {
+                    chatHistory.push({role: 'assistant', content: data.message});
+                    msgs.innerHTML = '<div class="chat-msg ai"><div class="chat-bubble ai">' + renderMd(data.message) + '</div></div>';
+                } else {
+                    msgs.innerHTML = '<div class="chat-msg ai"><div class="chat-bubble ai">인사이트 생성을 사용할 수 없습니다.</div></div>';
+                }
+            } catch(e) {
+                msgs.innerHTML = '<div class="chat-msg ai"><div class="chat-bubble ai">인사이트 생성 중 오류가 발생했습니다.</div></div>';
+            }
+        }
+
+        async function sendChat() {
+            var input = document.getElementById('chatInput');
+            var question = input.value.trim();
+            if (!question || !currentJobId) return;
+            input.value = '';
+            input.disabled = true;
+
+            var msgs = document.getElementById('chatMessages');
+            msgs.innerHTML += '<div class="chat-msg user"><div class="chat-bubble user">' + question + '</div></div>';
+            msgs.innerHTML += '<div class="chat-msg ai" id="typing"><div class="chat-bubble ai">답변 중...</div></div>';
+            msgs.scrollTop = msgs.scrollHeight;
+
+            chatHistory.push({role: 'user', content: question});
+
+            try {
+                var resp = await fetch('/api/insight/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({job_id: currentJobId, message: question, history: chatHistory})
+                });
+                var data = await resp.json();
+                var el = document.getElementById('typing');
+                if (el) el.remove();
+                if (data.status === 'ok') {
+                    chatHistory.push({role: 'assistant', content: data.message});
+                    msgs.innerHTML += '<div class="chat-msg ai"><div class="chat-bubble ai">' + renderMd(data.message) + '</div></div>';
+                } else {
+                    msgs.innerHTML += '<div class="chat-msg ai"><div class="chat-bubble ai">오류: ' + (data.message || '알 수 없는 오류') + '</div></div>';
+                }
+            } catch(e) {
+                var el = document.getElementById('typing');
+                if (el) el.remove();
+                msgs.innerHTML += '<div class="chat-msg ai"><div class="chat-bubble ai">네트워크 오류가 발생했습니다.</div></div>';
+            }
+            input.disabled = false;
+            input.focus();
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        async function submitAnalysis() {
+            var tab = document.getElementById('analysisType').value;
+            var input = document.getElementById('fileInput');
+            if (!input.files.length) return;
+
+            var fd = new FormData();
+            fd.append('file', input.files[0]);
+            fd.append('chart_mode', 'plotly');
+
+            if (tab === 'tcp') {
+                var dims = []; document.querySelectorAll('.tcp-dim:checked').forEach(function(c){dims.push(c.value);});
+                fd.append('dimensions', dims.join(',') || 'time,customer,product');
+                fd.append('date_col', ''); fd.append('customer_col', ''); fd.append('product_col', '');
+                fd.append('quantity_col', ''); fd.append('price_col', '');
+            }
+            if (tab === 'textmining') {
+                fd.append('n_topics', '5');
+                fd.append('top_n', '20');
+                var posArr = []; document.querySelectorAll('.pos-f:checked').forEach(function(c){posArr.push(c.value);});
+                fd.append('pos_filter', posArr.join(',') || 'NNG,NNP');
+                fd.append('analyses', 'tfidf,lda,network,wordcloud,sentiment');
+            }
+
+            var btn = document.getElementById('submitBtn');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-spinner"></span>' + (NAMES[tab] || tab) + ' 분석 중...';
+
+            try {
+                var resp = await fetch('/api/' + tab, {method: 'POST', body: fd});
+                var data = await resp.json();
+                if (data.status === 'ok') {
+                    showResult(data);
+                } else {
+                    alert('분석 오류: ' + (data.message || '알 수 없는 오류'));
+                }
+            } catch(e) {
+                alert('네트워크 오류: ' + e.message);
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
+        }
+
+        function showResult(data) {
+            var section = document.getElementById('resultSection');
+            section.innerHTML = '';
+            section.style.display = 'block';
+
+            // 요약
+            if (data.summary_html) {
+                section.innerHTML += '<div class="card"><h2>분석 결과</h2>' + data.summary_html + '</div>';
+            }
+
+            // 차트
+            var plotlyQueue = [];
+            if (data.charts) {
+                data.charts.forEach(function(chart, i) {
+                    var html = '<div class="card">';
+                    if (chart.title) html += '<h2>' + chart.title + '</h2>';
+
+                    var pData = chart.plotly || (chart.type === 'plotly' ? JSON.parse(chart.data) : null);
+                    var iData = chart.image || (chart.type === 'image' ? chart.data : null);
+
+                    if (pData) {
+                        html += '<div id="plotly-' + i + '"></div></div>';
+                        section.innerHTML += html;
+                        plotlyQueue.push({id: 'plotly-' + i, data: pData});
+                    } else if (iData) {
+                        html += '<img src="data:image/png;base64,' + iData + '" style="max-width:100%;border-radius:4px;"></div>';
+                        section.innerHTML += html;
+                    }
+                });
+            }
+
+            // 상세
+            if (data.details_html) {
+                section.innerHTML += '<div class="card"><h2>상세 결과</h2>' + data.details_html + '</div>';
+            }
+
+            // 다운로드
+            if (data.job_id && data.downloads && data.downloads.length) {
+                var dlHtml = '<div class="card"><h2>다운로드</h2>';
+                data.downloads.forEach(function(f) {
+                    dlHtml += '<a class="download-btn" href="/api/download/' + data.job_id + '/' + encodeURIComponent(f.filename) + '" download="' + f.filename + '">' + f.label + '</a>';
+                });
+                section.innerHTML += dlHtml + '</div>';
+            }
+
+            // Plotly 차트는 모든 HTML 추가 후 일괄 렌더링
+            plotlyQueue.forEach(function(item) {
+                Plotly.newPlot(item.id, item.data.data, item.data.layout, {responsive: true, displayModeBar: false});
+            });
+
+            section.scrollIntoView({behavior: 'smooth', block: 'start'});
+
+            // AI 인사이트 자동 시작
+            if (data.job_id) {
+                initInsight(data.job_id);
+            }
+        }
+    </script>
+</body>
+</html>

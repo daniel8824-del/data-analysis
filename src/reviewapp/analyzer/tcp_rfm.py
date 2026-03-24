@@ -9,19 +9,22 @@ import plotly.graph_objects as go
 import plotly.express as px
 import plotly.utils
 
-from analyzer.chart_utils import (
+from reviewapp.analyzer.chart_utils import (
     plotly_donut,
     plotly_bar_h,
     plotly_line,
     plotly_heatmap,
     plotly_to_json,
-    fig_to_base64,
+    plotly_save_png,
+    bundle_zip,
+    _apply_style,
+    CHART_COLORS,
 )
 
 logger = logging.getLogger("review-analyzer")
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RESULT_DIR = os.path.join(BASE_DIR, "results")
+WORK_DIR = os.path.join(os.path.expanduser("~"), ".review-analyzer")
+RESULT_DIR = os.path.join(WORK_DIR, "results")
 
 # ---------------------------------------------------------------------------
 # 요일 한글 매핑
@@ -76,32 +79,6 @@ def detect_commerce_columns(df: pd.DataFrame) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 차트를 chart_mode 에 맞게 포장하는 헬퍼
-# ---------------------------------------------------------------------------
-def _pack_chart(fig, title: str, chart_mode: str) -> dict:
-    """Plotly Figure -> 프론트엔드가 기대하는 chart dict."""
-    if chart_mode == "plotly":
-        return {
-            "title": title,
-            "plotly": json.loads(plotly_to_json(fig)),
-        }
-    else:
-        # 정적 이미지 모드: matplotlib 로 변환하지 않고 plotly 에서 PNG base64 를 만듦
-        # fig_to_base64 는 matplotlib Figure 전용이므로, plotly 이미지를 직접 생성
-        try:
-            img_bytes = fig.to_image(format="png", width=900, height=500, scale=2)
-            import base64
-            b64 = base64.b64encode(img_bytes).decode("utf-8")
-            return {"title": title, "image": b64}
-        except Exception:
-            # kaleido 미설치 시 plotly JSON 으로 폴백
-            return {
-                "title": title,
-                "plotly": json.loads(plotly_to_json(fig)),
-            }
-
-
-# ---------------------------------------------------------------------------
 # RFM 점수 계산 헬퍼
 # ---------------------------------------------------------------------------
 def _safe_qcut(series: pd.Series, q: int, labels) -> pd.Series:
@@ -149,6 +126,9 @@ def run_tcp(
     downloads: list[dict] = []
     job_dir = os.path.join(RESULT_DIR, job_id)
     os.makedirs(job_dir, exist_ok=True)
+
+    result_dir = os.path.join(RESULT_DIR, job_id)
+    os.makedirs(result_dir, exist_ok=True)
 
     # ----- 컬럼 매핑 결정 -------------------------------------------------
     if col_map is None:
@@ -208,14 +188,15 @@ def run_tcp(
     )
 
     summary_html = f"""
-    <table class="table table-sm table-bordered mb-3">
+    <table>
+        <thead><tr><th>항목</th><th>값</th></tr></thead>
         <tbody>
-            <tr><th style="width:140px;">분석 기간</th><td>{date_min} ~ {date_max}</td></tr>
-            <tr><th>총 거래 건수</th><td>{total_orders:,}건</td></tr>
-            <tr><th>고유 고객 수</th><td>{unique_customers:,}명</td></tr>
-            <tr><th>고유 상품 수</th><td>{unique_products if isinstance(unique_products, str) else f'{unique_products:,}개'}</td></tr>
-            <tr><th>총 매출</th><td>{total_revenue:,.0f}원</td></tr>
-            <tr><th>컬럼 매핑</th><td><code>{col_map_display}</code></td></tr>
+            <tr><td>분석 기간</td><td>{date_min} ~ {date_max}</td></tr>
+            <tr><td>총 거래 건수</td><td>{total_orders:,}건</td></tr>
+            <tr><td>고유 고객 수</td><td>{unique_customers:,}명</td></tr>
+            <tr><td>고유 상품 수</td><td>{unique_products if isinstance(unique_products, str) else f'{unique_products:,}개'}</td></tr>
+            <tr><td>총 매출</td><td>{total_revenue:,.0f}원</td></tr>
+            <tr><td>컬럼 매핑</td><td>{col_map_display}</td></tr>
         </tbody>
     </table>
     """
@@ -236,7 +217,8 @@ def run_tcp(
             xlabel="월",
             ylabel="매출(원)",
         )
-        charts.append(_pack_chart(fig_monthly, "월별 매출 추이", chart_mode))
+        plotly_save_png(fig_monthly, os.path.join(result_dir, "월별_매출_추이.png"))
+        charts.append({"title": "월별 매출 추이", "plotly": json.loads(plotly_to_json(fig_monthly))})
 
         # CSV 저장
         monthly_path = os.path.join(job_dir, "TCP_매출분석.csv")
@@ -255,7 +237,8 @@ def run_tcp(
             xlabel="날짜",
             ylabel="주문 건수",
         )
-        charts.append(_pack_chart(fig_daily, "일별 주문 건수", chart_mode))
+        plotly_save_png(fig_daily, os.path.join(result_dir, "일별_주문_건수.png"))
+        charts.append({"title": "일별 주문 건수", "plotly": json.loads(plotly_to_json(fig_daily))})
 
         # --- 1-3. 요일별 주문 비율 ---
         df["요일"] = df[date_col].dt.dayofweek.map(DAY_KR)
@@ -269,13 +252,13 @@ def run_tcp(
             textposition="outside",
             marker_color=["#ef4444" if d in ("토", "일") else "#4361ee" for d in DAY_ORDER],
         ))
-        fig_dow.update_layout(
-            title=dict(text="요일별 주문 비율", font=dict(size=16)),
+        _apply_style(fig_dow,
+            title=dict(text="요일별 주문 비율", font=dict(size=14, color="#333"), x=0.5, xanchor="center"),
             xaxis_title="요일",
             yaxis_title="주문 건수",
-            margin=dict(t=60, b=50, l=60, r=30),
         )
-        charts.append(_pack_chart(fig_dow, "요일별 주문 비율", chart_mode))
+        plotly_save_png(fig_dow, os.path.join(result_dir, "요일별_주문_비율.png"))
+        charts.append({"title": "요일별 주문 비율", "plotly": json.loads(plotly_to_json(fig_dow))})
 
     # =====================================================================
     # 2. 상품 분석 (Product Analysis)
@@ -296,7 +279,8 @@ def run_tcp(
             text_suffix="원",
         )
         fig_prod_rev.update_layout(xaxis_title="매출(원)", yaxis=dict(autorange="reversed"))
-        charts.append(_pack_chart(fig_prod_rev, "상품별 매출 TOP 15", chart_mode))
+        plotly_save_png(fig_prod_rev, os.path.join(result_dir, "상품별_매출_TOP15.png"))
+        charts.append({"title": "상품별 매출 TOP 15", "plotly": json.loads(plotly_to_json(fig_prod_rev))})
 
         # --- 2-2. 상품별 판매량 TOP 15 ---
         prod_qty = (
@@ -313,12 +297,16 @@ def run_tcp(
             text_suffix="개",
         )
         fig_prod_qty.update_layout(xaxis_title="판매량(개)", yaxis=dict(autorange="reversed"))
-        charts.append(_pack_chart(fig_prod_qty, "상품별 판매량 TOP 15", chart_mode))
+        plotly_save_png(fig_prod_qty, os.path.join(result_dir, "상품별_판매량_TOP15.png"))
+        charts.append({"title": "상품별 판매량 TOP 15", "plotly": json.loads(plotly_to_json(fig_prod_qty))})
 
     # =====================================================================
     # 3. RFM 분석 (고객 기준)
     # =====================================================================
     if "customer" not in dimensions:
+        # ZIP 번들 (PNG 차트)
+        chart_zip = bundle_zip(result_dir, "차트_이미지.zip", pattern="*.png")
+        downloads.append({"filename": chart_zip, "label": "차트 이미지 ZIP"})
         return {
             "summary_html": summary_html,
             "charts": charts,
@@ -362,7 +350,8 @@ def run_tcp(
         title="고객 세그먼트 분포",
         colors=seg_colors,
     )
-    charts.append(_pack_chart(fig_seg_donut, "고객 세그먼트 분포", chart_mode))
+    plotly_save_png(fig_seg_donut, os.path.join(result_dir, "고객_세그먼트_분포.png"))
+    charts.append({"title": "고객 세그먼트 분포", "plotly": json.loads(plotly_to_json(fig_seg_donut))})
 
     # --- 3-2. 세그먼트별 평균 RFM (그룹 바 차트) ---
     seg_avg = rfm.groupby("세그먼트")[["R_score", "F_score", "M_score"]].mean()
@@ -384,47 +373,16 @@ def run_tcp(
             text=[f"{v:.1f}" for v in seg_avg[col_name]],
             textposition="outside",
         ))
-    fig_seg_rfm.update_layout(
+    _apply_style(fig_seg_rfm,
         barmode="group",
-        title=dict(text="세그먼트별 평균 RFM", font=dict(size=16)),
+        title=dict(text="세그먼트별 평균 RFM", font=dict(size=14, color="#333"), x=0.5, xanchor="center"),
         xaxis_title="세그먼트",
         yaxis_title="평균 점수",
-        margin=dict(t=60, b=80, l=60, r=30),
         legend=dict(orientation="h", y=-0.2),
     )
-    charts.append(_pack_chart(fig_seg_rfm, "세그먼트별 평균 RFM", chart_mode))
+    plotly_save_png(fig_seg_rfm, os.path.join(result_dir, "세그먼트별_평균_RFM.png"))
+    charts.append({"title": "세그먼트별 평균 RFM", "plotly": json.loads(plotly_to_json(fig_seg_rfm))})
 
-    # --- 3-3. RFM 3D 분포 ---
-    color_map = {seg: SEGMENT_COLORS.get(seg, "#94a3b8") for seg in rfm["세그먼트"].unique()}
-
-    fig_3d = go.Figure()
-    for seg_name in rfm["세그먼트"].unique():
-        subset = rfm[rfm["세그먼트"] == seg_name]
-        fig_3d.add_trace(go.Scatter3d(
-            x=subset["R_score"],
-            y=subset["F_score"],
-            z=subset["M_score"],
-            mode="markers",
-            name=seg_name,
-            marker=dict(
-                size=4,
-                color=color_map.get(seg_name, "#94a3b8"),
-                opacity=0.7,
-            ),
-            text=subset[cust_col].astype(str),
-            hovertemplate="고객: %{text}<br>R: %{x}<br>F: %{y}<br>M: %{z}<extra></extra>",
-        ))
-    fig_3d.update_layout(
-        title=dict(text="RFM 3D 분포", font=dict(size=16)),
-        scene=dict(
-            xaxis_title="R (최근성)",
-            yaxis_title="F (빈도)",
-            zaxis_title="M (금액)",
-        ),
-        margin=dict(t=60, b=30, l=30, r=30),
-        legend=dict(orientation="h", y=-0.1),
-    )
-    charts.append(_pack_chart(fig_3d, "RFM 3D 분포", chart_mode))
 
     # =====================================================================
     # 상세 HTML: RFM 세그먼트 테이블 + 인사이트
@@ -471,23 +429,26 @@ def run_tcp(
     avg_order_value = total_revenue / total_orders
     insights.append(f"건당 평균 주문 금액은 <strong>{avg_order_value:,.0f}원</strong>입니다.")
 
-    insights_html = "".join(f'<li class="mb-1">{i}</li>' for i in insights)
+    insights_html = "".join(f"<li style='margin-bottom:4px;'>{i}</li>" for i in insights)
 
     details_html = f"""
-    <h6 class="mb-3">RFM 세그먼트 요약</h6>
-    <table class="table table-sm table-bordered table-hover">
-        <thead class="table-light">
+    <table>
+        <thead>
             <tr><th>세그먼트</th><th>고객 수</th><th>평균 R (최근성)</th><th>평균 F (빈도)</th><th>평균 M (금액)</th></tr>
         </thead>
         <tbody>{seg_table_rows}</tbody>
     </table>
-    <h6 class="mt-4 mb-2">주요 인사이트</h6>
+    <div style="height:12px"></div>
     <ul>{insights_html}</ul>
-    <p class="text-muted mt-3" style="font-size:0.85rem;">
-        * R(Recency): 마지막 구매 후 경과 일수, F(Frequency): 구매 횟수, M(Monetary): 총 구매 금액<br>
-        * 각 지표는 5분위수(qcut)로 1~5점 부여 (5점이 가장 우수)
-    </p>
+    <div style="color:#888;margin-top:8px;">
+        R(Recency): 마지막 구매 후 경과 일수 / F(Frequency): 구매 횟수 / M(Monetary): 총 구매 금액<br>
+        각 지표는 5분위수(qcut)로 1~5점 부여 (5점이 가장 우수)
+    </div>
     """
+
+    # --- ZIP 번들 (PNG 차트) ---
+    chart_zip = bundle_zip(result_dir, "차트_이미지.zip", pattern="*.png")
+    downloads.append({"filename": chart_zip, "label": "차트 이미지 ZIP"})
 
     return {
         "summary_html": summary_html,

@@ -3,13 +3,13 @@ import os
 import json
 import pandas as pd
 
-from app import detect_text_column
-from analyzer.chart_utils import (
+from reviewapp.app import detect_text_column
+from reviewapp.analyzer.chart_utils import (
     plotly_donut,
     plotly_bar_h,
-    fig_to_base64,
     plotly_to_json,
-    get_korean_font_path,
+    plotly_save_png,
+    bundle_zip,
 )
 
 # ---------------------------------------------------------------------------
@@ -59,12 +59,14 @@ def run_classification(df: pd.DataFrame, job_id: str, chart_mode: str = "plotly"
     df["_review_text"] = df[text_col].fillna("").astype(str)
     df["카테고리"] = df["_review_text"].apply(_classify_text)
 
-    # 3) 카테고리별 집계 (카테고리 정의 순서 유지 + 미분류 마지막)
-    category_order = [c[0] for c in CATEGORIES] + [UNCLASSIFIED]
+    # 3) 카테고리별 집계 (건수 내림차순, 미분류는 항상 마지막)
     counts = df["카테고리"].value_counts()
-    # 순서 보장
-    ordered_cats = [c for c in category_order if c in counts.index]
-    ordered_counts = [int(counts[c]) for c in ordered_cats]
+    cats_without_uncl = [(c, int(counts[c])) for c in counts.index if c != UNCLASSIFIED]
+    cats_without_uncl.sort(key=lambda x: x[1], reverse=True)
+    if UNCLASSIFIED in counts.index:
+        cats_without_uncl.append((UNCLASSIFIED, int(counts[UNCLASSIFIED])))
+    ordered_cats = [c for c, _ in cats_without_uncl]
+    ordered_counts = [v for _, v in cats_without_uncl]
     total = sum(ordered_counts)
 
     # 4) 색상 매핑
@@ -85,135 +87,75 @@ def run_classification(df: pd.DataFrame, job_id: str, chart_mode: str = "plotly"
             f"<tr>"
             f'<td><span style="display:inline-block;width:12px;height:12px;'
             f'border-radius:50%;background:{color};margin-right:6px;"></span>{cat}</td>'
-            f"<td style=\"text-align:right\">{cnt:,}건</td>"
-            f"<td style=\"text-align:right\">{pct:.1f}%</td>"
+            f"<td >{cnt:,}건</td>"
+            f"<td >{pct:.1f}%</td>"
             f"</tr>"
         )
     summary_html = (
         '<table class="table table-sm table-hover">'
-        "<thead><tr><th>카테고리</th><th style=\"text-align:right\">건수</th>"
-        "<th style=\"text-align:right\">비율</th></tr></thead>"
+        "<thead><tr><th>카테고리</th><th >건수</th>"
+        "<th >비율</th></tr></thead>"
         f"<tbody>{rows_html}</tbody>"
         f'<tfoot><tr style="font-weight:bold"><td>합계</td>'
-        f'<td style="text-align:right">{total:,}건</td>'
-        f'<td style="text-align:right">100.0%</td></tr></tfoot>'
+        f'<td>{total:,}건</td>'
+        f'<td>100.0%</td></tr></tfoot>'
         "</table>"
     )
 
     # -----------------------------------------------------------------------
-    # 차트 생성
+    # 차트 생성 (Plotly 인터랙티브 + kaleido PNG 다운로드)
     # -----------------------------------------------------------------------
     charts = []
+    result_dir = os.path.join(os.path.dirname(__file__), "..", "results", job_id)
+    os.makedirs(result_dir, exist_ok=True)
 
     # -- 도넛 차트 --
     donut_fig = plotly_donut(
-        labels=ordered_cats,
-        values=ordered_counts,
-        title="카테고리별 비율",
-        colors=ordered_colors,
+        labels=ordered_cats, values=ordered_counts,
+        title="카테고리별 비율", colors=ordered_colors,
     )
-    # 5% 미만은 라벨 숨김
-    if total > 0:
-        pct_values = [v / total for v in ordered_counts]
-        text_info_list = [
-            "percent+label" if p >= 0.05 else "none"
-            for p in pct_values
-        ]
-        donut_fig.update_traces(textinfo=None, textposition="auto")
-        donut_fig.update_traces(
-            text=[
-                f"{cat}<br>{v/total*100:.1f}%" if v/total >= 0.05 else ""
-                for cat, v in zip(ordered_cats, ordered_counts)
-            ],
-            textinfo="text",
-        )
+    donut_json = json.loads(plotly_to_json(donut_fig))
+    charts.append({"title": "카테고리별 비율", "plotly": donut_json})
+    plotly_save_png(donut_fig, os.path.join(result_dir, "카테고리별_비율.png"))
 
     # -- 수평 바 차트 --
     bar_fig = plotly_bar_h(
-        labels=ordered_cats,
-        values=ordered_counts,
-        title="카테고리별 리뷰 수",
-        color=ordered_colors,
+        labels=ordered_cats, values=ordered_counts,
+        title="카테고리별 리뷰 수", color=ordered_colors,
     )
-
-    if chart_mode == "plotly":
-        donut_json = json.loads(plotly_to_json(donut_fig))
-        bar_json = json.loads(plotly_to_json(bar_fig))
-        charts.append({"title": "카테고리별 비율", "plotly": donut_json})
-        charts.append({"title": "카테고리별 리뷰 수", "plotly": bar_json})
-    else:
-        # static matplotlib 이미지
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-
-        # 도넛 (matplotlib)
-        fig_d, ax_d = plt.subplots(figsize=(7, 5))
-        wedges, texts, autotexts = ax_d.pie(
-            ordered_counts,
-            labels=[c if (ordered_counts[i] / total >= 0.05 if total > 0 else False) else "" for i, c in enumerate(ordered_cats)],
-            autopct=lambda p: f"{p:.1f}%" if p >= 5 else "",
-            colors=ordered_colors,
-            pctdistance=0.75,
-            wedgeprops=dict(width=0.45),
-        )
-        ax_d.set_title("카테고리별 비율", fontsize=14)
-        ax_d.legend(ordered_cats, loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=9)
-        plt.tight_layout()
-        charts.append({"title": "카테고리별 비율", "image": fig_to_base64(fig_d)})
-
-        # 수평 바 (matplotlib)
-        fig_b, ax_b = plt.subplots(figsize=(7, max(3, len(ordered_cats) * 0.55)))
-        y_pos = range(len(ordered_cats))
-        ax_b.barh(y_pos, ordered_counts, color=ordered_colors)
-        ax_b.set_yticks(y_pos)
-        ax_b.set_yticklabels(ordered_cats)
-        ax_b.invert_yaxis()
-        ax_b.set_xlabel("건수")
-        ax_b.set_title("카테고리별 리뷰 수", fontsize=14)
-        for i, v in enumerate(ordered_counts):
-            ax_b.text(v + max(ordered_counts) * 0.01, i, f"{v:,}건", va="center", fontsize=9)
-        plt.tight_layout()
-        charts.append({"title": "카테고리별 리뷰 수", "image": fig_to_base64(fig_b)})
+    bar_json = json.loads(plotly_to_json(bar_fig))
+    charts.append({"title": "카테고리별 리뷰 수", "plotly": bar_json})
+    plotly_save_png(bar_fig, os.path.join(result_dir, "카테고리별_리뷰수.png"),
+                    height=max(400, len(ordered_cats) * 50))
 
     # -----------------------------------------------------------------------
     # 상세 결과 - 카테고리별 대표 리뷰 아코디언
     # -----------------------------------------------------------------------
-    accordion_id = "classifyAccordion"
     accordion_items = ""
     for idx, cat in enumerate(ordered_cats):
         cat_df = df[df["카테고리"] == cat]
         sample_reviews = cat_df["_review_text"].head(5).tolist()
         reviews_html = ""
         for r in sample_reviews:
-            # 너무 긴 리뷰는 200자로 자름
             display = r[:200] + "..." if len(r) > 200 else r
-            reviews_html += f'<div class="border-bottom py-2 small">{display}</div>'
+            reviews_html += f'<div class="acc-review">{display}</div>'
         if not sample_reviews:
-            reviews_html = '<div class="text-muted small">해당 카테고리 리뷰가 없습니다.</div>'
+            reviews_html = '<div class="acc-review" style="color:#999;">해당 카테고리 리뷰가 없습니다.</div>'
 
         cat_count = len(cat_df)
-        collapsed = "" if idx == 0 else "collapsed"
-        show = "show" if idx == 0 else ""
+        open_cls = " open" if idx == 0 else ""
         accordion_items += (
-            f'<div class="accordion-item">'
-            f'<h2 class="accordion-header">'
-            f'<button class="accordion-button {collapsed}" type="button" '
-            f'data-bs-toggle="collapse" data-bs-target="#collapse-cls-{idx}">'
-            f'{cat} ({cat_count:,}건)'
-            f'</button></h2>'
-            f'<div id="collapse-cls-{idx}" class="accordion-collapse collapse {show}" '
-            f'data-bs-parent="#{accordion_id}">'
-            f'<div class="accordion-body">{reviews_html}</div></div></div>'
+            f'<div class="acc-item">'
+            f'<button class="acc-btn{open_cls}" onclick="toggleAcc(this)">'
+            f'{cat} ({cat_count:,}건)</button>'
+            f'<div class="acc-body{open_cls}">{reviews_html}</div></div>'
         )
 
-    details_html = f'<div class="accordion" id="{accordion_id}">{accordion_items}</div>'
+    details_html = accordion_items
 
     # -----------------------------------------------------------------------
     # CSV 저장
     # -----------------------------------------------------------------------
-    result_dir = os.path.join(os.path.dirname(__file__), "..", "results", job_id)
-    os.makedirs(result_dir, exist_ok=True)
     csv_filename = "리뷰_분류결과.csv"
     csv_path = os.path.join(result_dir, csv_filename)
 
@@ -224,7 +166,12 @@ def run_classification(df: pd.DataFrame, job_id: str, chart_mode: str = "plotly"
     # -----------------------------------------------------------------------
     # 반환
     # -----------------------------------------------------------------------
-    downloads = [{"filename": csv_filename, "label": "분류 결과 CSV"}]
+    # 차트 PNG를 ZIP으로 묶기
+    chart_zip = bundle_zip(result_dir, "차트_이미지.zip", pattern="*.png")
+    downloads = [
+        {"filename": csv_filename, "label": "분류 결과 CSV"},
+        {"filename": chart_zip, "label": "차트 이미지 ZIP"},
+    ]
 
     return {
         "summary_html": summary_html,
