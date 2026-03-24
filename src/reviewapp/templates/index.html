@@ -110,6 +110,15 @@
         <form id="analysisForm" class="card">
             <h2>데이터 분석</h2>
 
+            <div id="apiKeySection" style="margin-bottom:16px;padding:12px 14px;background:#f0f9f9;border-radius:8px;">
+                <label style="margin-bottom:4px;">OpenRouter API Key</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." style="margin-bottom:0;flex:1;font-size:12px;">
+                    <button type="button" class="btn" style="width:auto;padding:8px 16px;font-size:13px;" onclick="saveApiKey()">저장</button>
+                </div>
+                <div style="font-size:11px;color:#999;margin-top:4px;">AI 인사이트 기능 사용 시 필요 · <a href="https://openrouter.ai/settings/keys" target="_blank" style="color:#01696F;">키 발급</a></div>
+            </div>
+
             <label>분석 유형</label>
             <select id="analysisType" onchange="onTypeChange()">
                 <option value="classify">리뷰 분석 - 카테고리별 분류</option>
@@ -157,13 +166,6 @@
         <!-- AI 인사이트 -->
         <div id="insightSection" class="card" style="display:none;">
             <h2>AI 인사이트</h2>
-            <div id="apiKeySection" style="margin-bottom:12px;">
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="password" id="apiKeyInput" placeholder="OpenRouter API Key (sk-or-v1-...)" style="margin-bottom:0;flex:1;font-size:12px;">
-                    <button type="button" class="btn" style="width:auto;padding:8px 16px;font-size:13px;" onclick="saveApiKey()">저장</button>
-                </div>
-                <div style="font-size:11px;color:#999;margin-top:4px;">openrouter.ai/settings/keys 에서 발급 가능 · 브라우저에 저장됩니다</div>
-            </div>
             <div id="chatMessages" class="chat-messages"></div>
             <div class="chat-input-row">
                 <input type="text" id="chatInput" placeholder="추가 질문을 입력하세요..." onkeypress="if(event.key==='Enter')sendChat()">
