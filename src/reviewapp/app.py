@@ -32,7 +32,6 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("review-analyzer")
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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")
 INSIGHT_MODEL = "anthropic/claude-sonnet-4-6"
 
 app = FastAPI(title="이커머스 데이터 분석", description="수업용 리뷰/데이터 분석 웹앱")
@@ -289,7 +288,8 @@ async def api_insight_init(request: Request):
     """분석 결과 초기 AI 해석 생성."""
     body = await request.json()
     job_id = body.get("job_id")
-    if not job_id or not OPENROUTER_API_KEY:
+    api_key = body.get("api_key", "")
+    if not job_id or not api_key:
         return JSONResponse({"status": "error", "message": "API 키 또는 job_id 없음"}, status_code=400)
 
     context_path = os.path.join(RESULT_DIR, job_id, "insight_context.txt")
@@ -314,11 +314,13 @@ async def api_insight_init(request: Request):
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+                headers={"Authorization": f"Bearer {api_key}"},
                 json={"model": INSIGHT_MODEL, "messages": messages, "max_tokens": 10284},
                 timeout=60,
             )
             data = resp.json()
+            if "error" in data:
+                return JSONResponse({"status": "error", "message": data["error"].get("message", "API 오류")}, status_code=401)
             answer = data["choices"][0]["message"]["content"]
         return JSONResponse({"status": "ok", "message": answer})
     except Exception as e:
@@ -331,10 +333,11 @@ async def api_insight_chat(request: Request):
     """추가 질문 응답."""
     body = await request.json()
     job_id = body.get("job_id")
+    api_key = body.get("api_key", "")
     question = body.get("message", "")
     history = body.get("history", [])
 
-    if not job_id or not question or not OPENROUTER_API_KEY:
+    if not job_id or not question or not api_key:
         return JSONResponse({"status": "error", "message": "필수 파라미터 누락"}, status_code=400)
 
     context_path = os.path.join(RESULT_DIR, job_id, "insight_context.txt")
@@ -361,11 +364,13 @@ async def api_insight_chat(request: Request):
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+                headers={"Authorization": f"Bearer {api_key}"},
                 json={"model": INSIGHT_MODEL, "messages": messages, "max_tokens": 10284},
                 timeout=60,
             )
             data = resp.json()
+            if "error" in data:
+                return JSONResponse({"status": "error", "message": data["error"].get("message", "API 오류")}, status_code=401)
             answer = data["choices"][0]["message"]["content"]
         return JSONResponse({"status": "ok", "message": answer})
     except Exception as e:

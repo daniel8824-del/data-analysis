@@ -157,6 +157,13 @@
         <!-- AI 인사이트 -->
         <div id="insightSection" class="card" style="display:none;">
             <h2>AI 인사이트</h2>
+            <div id="apiKeySection" style="margin-bottom:12px;">
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="password" id="apiKeyInput" placeholder="OpenRouter API Key (sk-or-v1-...)" style="margin-bottom:0;flex:1;font-size:12px;">
+                    <button type="button" class="btn" style="width:auto;padding:8px 16px;font-size:13px;" onclick="saveApiKey()">저장</button>
+                </div>
+                <div style="font-size:11px;color:#999;margin-top:4px;">openrouter.ai/settings/keys 에서 발급 가능 · 브라우저에 저장됩니다</div>
+            </div>
             <div id="chatMessages" class="chat-messages"></div>
             <div class="chat-input-row">
                 <input type="text" id="chatInput" placeholder="추가 질문을 입력하세요..." onkeypress="if(event.key==='Enter')sendChat()">
@@ -205,6 +212,24 @@
         var currentJobId = null;
         var chatHistory = [];
 
+        // API 키 관리
+        function getApiKey() { return localStorage.getItem('openrouter_api_key') || ''; }
+        function saveApiKey() {
+            var key = document.getElementById('apiKeyInput').value.trim();
+            if (!key) return;
+            localStorage.setItem('openrouter_api_key', key);
+            document.getElementById('apiKeyInput').value = '';
+            document.getElementById('apiKeySection').innerHTML = '<div style="font-size:12px;color:#01696F;font-weight:600;">API Key 저장 완료</div>';
+            if (currentJobId) initInsight(currentJobId);
+        }
+        // 페이지 로드 시 키 있으면 섹션 숨김
+        window.addEventListener('load', function() {
+            if (getApiKey()) {
+                var sec = document.getElementById('apiKeySection');
+                if (sec) sec.innerHTML = '<div style="font-size:12px;color:#01696F;">API Key 설정됨 · <a href="#" onclick="localStorage.removeItem(\'openrouter_api_key\');location.reload();return false;" style="color:#999;font-size:11px;">변경</a></div>';
+            }
+        });
+
         function renderMd(text) {
             try { return marked.parse(text); } catch(e) { return text.replace(/\n/g, '<br>'); }
         }
@@ -214,6 +239,11 @@
             chatHistory = [];
             var section = document.getElementById('insightSection');
             section.style.display = 'block';
+            var key = getApiKey();
+            if (!key) {
+                document.getElementById('chatMessages').innerHTML = '';
+                return;
+            }
             var msgs = document.getElementById('chatMessages');
             msgs.innerHTML = '<div class="chat-msg ai"><div class="chat-bubble ai">분석 결과를 해석하고 있습니다...</div></div>';
 
@@ -221,7 +251,7 @@
                 var resp = await fetch('/api/insight/init', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({job_id: jobId})
+                    body: JSON.stringify({job_id: jobId, api_key: key})
                 });
                 var data = await resp.json();
                 if (data.status === 'ok') {
@@ -253,7 +283,7 @@
                 var resp = await fetch('/api/insight/chat', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({job_id: currentJobId, message: question, history: chatHistory})
+                    body: JSON.stringify({job_id: currentJobId, message: question, history: chatHistory, api_key: getApiKey()})
                 });
                 var data = await resp.json();
                 var el = document.getElementById('typing');
