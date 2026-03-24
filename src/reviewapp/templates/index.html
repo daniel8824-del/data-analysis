@@ -113,7 +113,7 @@
             <div id="apiKeySection" style="margin-bottom:16px;padding:12px 14px;background:#f0f9f9;border-radius:8px;">
                 <label style="margin-bottom:4px;">OpenRouter API Key</label>
                 <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." style="margin-bottom:0;flex:1;font-size:12px;">
+                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-..." style="margin-bottom:0;flex:1;font-size:12px;" onkeypress="if(event.key==='Enter'){event.preventDefault();saveApiKey()}">
                     <button type="button" class="btn" style="width:auto;padding:8px 16px;font-size:13px;" onclick="saveApiKey()">저장</button>
                 </div>
                 <div style="font-size:11px;color:#999;margin-top:4px;">AI 인사이트 기능 사용 시 필요 · <a href="https://openrouter.ai/settings/keys" target="_blank" style="color:#01696F;">키 발급</a></div>
@@ -217,11 +217,12 @@
         // API 키 관리
         function getApiKey() { return localStorage.getItem('openrouter_api_key') || ''; }
         function saveApiKey() {
-            var key = document.getElementById('apiKeyInput').value.trim();
-            if (!key) return;
+            var el = document.getElementById('apiKeyInput');
+            if (!el) return;
+            var key = el.value.trim();
+            if (!key) { alert('API Key를 입력해주세요.'); return; }
             localStorage.setItem('openrouter_api_key', key);
-            document.getElementById('apiKeyInput').value = '';
-            document.getElementById('apiKeySection').innerHTML = '<div style="font-size:12px;color:#01696F;font-weight:600;">API Key 저장 완료</div>';
+            document.getElementById('apiKeySection').innerHTML = '<div style="font-size:12px;color:#01696F;font-weight:600;">API Key 저장 완료 (' + key.substring(0,12) + '...) · <a href="#" onclick="localStorage.removeItem(\'openrouter_api_key\');location.reload();return false;" style="color:#999;font-size:11px;">변경</a></div>';
             if (currentJobId) initInsight(currentJobId);
         }
         // 페이지 로드 시 키 있으면 섹션 숨김
