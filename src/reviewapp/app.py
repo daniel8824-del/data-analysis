@@ -32,7 +32,7 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("review-analyzer")
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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")
 INSIGHT_MODEL = "anthropic/claude-sonnet-4-6"
 
 app = FastAPI(title="이커머스 데이터 분석", description="수업용 리뷰/데이터 분석 웹앱")
