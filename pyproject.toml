@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [project.scripts]
-da = "reviewapp.__main__:main"
+data = "reviewapp.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/daniel8824-del/data-analysis"
